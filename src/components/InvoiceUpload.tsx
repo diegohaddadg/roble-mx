@@ -84,8 +84,8 @@ export default function InvoiceUpload({
           transition-all duration-200 cursor-pointer
           ${
             isDragging
-              ? "border-orange-400 bg-orange-50/80 scale-[1.01]"
-              : "border-zinc-200 bg-white hover:border-orange-300 hover:bg-orange-50/30"
+              ? "border-indigo-400 bg-indigo-50/80 scale-[1.01]"
+              : "border-zinc-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/30"
           }
           ${isUploading ? "opacity-60 pointer-events-none" : ""}
         `}
@@ -93,12 +93,12 @@ export default function InvoiceUpload({
         <div
           className={`
             w-14 h-14 rounded-2xl flex items-center justify-center transition-colors duration-200
-            ${isDragging ? "bg-orange-100" : "bg-zinc-100 group-hover:bg-orange-100"}
+            ${isDragging ? "bg-indigo-100" : "bg-zinc-100 group-hover:bg-indigo-100"}
           `}
         >
           {isUploading ? (
             <svg
-              className="w-6 h-6 text-orange-500 animate-spin"
+              className="w-6 h-6 text-indigo-600 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -120,8 +120,8 @@ export default function InvoiceUpload({
             <svg
               className={`w-6 h-6 transition-colors duration-200 ${
                 isDragging
-                  ? "text-orange-500"
-                  : "text-zinc-400 group-hover:text-orange-500"
+                  ? "text-indigo-600"
+                  : "text-zinc-400 group-hover:text-indigo-600"
               }`}
               fill="none"
               stroke="currentColor"

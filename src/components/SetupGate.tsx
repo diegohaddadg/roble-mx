@@ -14,7 +14,7 @@ export default function SetupGate({ children }: SetupGateProps) {
   if (!isReady) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -25,7 +25,7 @@ export default function SetupGate({ children }: SetupGateProps) {
         <div className="w-full max-w-sm">
           <div className="bg-white rounded-2xl border border-zinc-200/80 p-8 shadow-sm">
             <div className="text-center mb-8">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/20">
+              <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold text-2xl">T</span>
               </div>
               <h1 className="text-xl font-bold text-zinc-900">Toast MX</h1>
@@ -42,7 +42,7 @@ export default function SetupGate({ children }: SetupGateProps) {
                   ref={inputRef}
                   type="text"
                   placeholder="Pega el ID aquí..."
-                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       setRestaurantId((e.target as HTMLInputElement).value);
@@ -54,7 +54,7 @@ export default function SetupGate({ children }: SetupGateProps) {
                 onClick={() => {
                   if (inputRef.current) setRestaurantId(inputRef.current.value);
                 }}
-                className="w-full py-2.5 bg-orange-500 text-white text-sm font-medium rounded-xl hover:bg-orange-600 active:scale-[0.98] transition-all shadow-sm shadow-orange-500/25"
+                className="w-full py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition-all"
               >
                 Comenzar
               </button>

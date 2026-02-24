@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 ::selection {
-  background-color: #fed7aa;
-  color: #9a3412;
+  background-color: #c7d2fe;
+  color: #312e81;
 }
 
 input[type="number"]::-webkit-inner-spin-button,

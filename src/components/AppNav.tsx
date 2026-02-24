@@ -19,7 +19,7 @@ export default function AppNav() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
           <Link href="/scanner" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-sm shadow-orange-500/20">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">T</span>
             </div>
             <span className="font-semibold text-zinc-900 hidden sm:block">
@@ -37,7 +37,7 @@ export default function AppNav() {
                     href={item.href}
                     className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-all duration-150 ${
                       isActive
-                        ? "text-orange-700 bg-orange-50"
+                        ? "text-indigo-700 bg-indigo-50"
                         : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50"
                     }`}
                   >

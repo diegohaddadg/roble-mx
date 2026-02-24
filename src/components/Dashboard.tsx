@@ -138,7 +138,6 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Avg Food Cost */}
         <div
           className={`border rounded-2xl p-4 sm:p-5 ${getFoodCostBg(data.summary.avgFoodCostPercent)}`}
         >
@@ -153,7 +152,6 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
           <div className="text-xs text-zinc-400 mt-1">Meta: &lt;30%</div>
         </div>
 
-        {/* This Week Spending */}
         <div className="bg-white border border-zinc-100 rounded-2xl p-4 sm:p-5">
           <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
             Gasto esta semana
@@ -175,7 +173,6 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
           )}
         </div>
 
-        {/* This Month */}
         <div className="bg-white border border-zinc-100 rounded-2xl p-4 sm:p-5">
           <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
             Gasto este mes
@@ -185,7 +182,6 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
           </div>
         </div>
 
-        {/* Pending Invoices */}
         <div className="bg-white border border-zinc-100 rounded-2xl p-4 sm:p-5">
           <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
             Facturas pendientes
@@ -201,7 +197,6 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
 
       {/* Two-column: Top + Bottom recipes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Profitable */}
         <div className="bg-white border border-zinc-100 rounded-2xl p-5">
           <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-4">
             Más rentables
@@ -244,7 +239,6 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
           )}
         </div>
 
-        {/* Bottom Profitable */}
         <div className="bg-white border border-zinc-100 rounded-2xl p-5">
           <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-4">
             Menor margen
@@ -360,7 +354,10 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
               const maxSpend = data.supplierBreakdown[0]?.totalSpent || 1;
               const barWidth = (supplier.totalSpent / maxSpend) * 100;
               return (
-                <div key={supplier.supplierId || "none"} className="space-y-1.5">
+                <div
+                  key={supplier.supplierId || "none"}
+                  className="space-y-1.5"
+                >
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-zinc-700">
                       {supplier.supplierName}
@@ -373,7 +370,7 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
                   </div>
                   <div className="w-full bg-zinc-100 rounded-full h-1.5">
                     <div
-                      className="h-1.5 rounded-full bg-orange-400 transition-all duration-500"
+                      className="h-1.5 rounded-full bg-indigo-500 transition-all duration-500"
                       style={{ width: `${barWidth}%` }}
                     />
                   </div>

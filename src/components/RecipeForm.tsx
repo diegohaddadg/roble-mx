@@ -34,7 +34,7 @@ interface RecipeFormProps {
 }
 
 const inputClass =
-  "w-full px-3 py-2 bg-zinc-50/50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-colors";
+  "w-full px-3 py-2 bg-zinc-50/50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-colors";
 
 export default function RecipeForm({
   restaurantId,
@@ -299,7 +299,7 @@ export default function RecipeForm({
               </h3>
               <button
                 onClick={addItem}
-                className="text-xs font-medium text-orange-600 hover:text-orange-700 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors"
+                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 transition-colors"
               >
                 + Agregar
               </button>
@@ -327,7 +327,7 @@ export default function RecipeForm({
                 </p>
                 <button
                   onClick={addItem}
-                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+                  className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
                 >
                   Agregar primer ingrediente
                 </button>
@@ -532,7 +532,7 @@ export default function RecipeForm({
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full py-2.5 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-300 rounded-xl transition-all shadow-sm active:scale-[0.98]"
+            className="w-full py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 rounded-xl transition-all active:scale-[0.98]"
           >
             {isSaving
               ? "Guardando..."

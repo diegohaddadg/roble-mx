@@ -58,7 +58,7 @@ export default function RecipesPage() {
         </div>
         <Link
           href="/recipes/new"
-          className="px-4 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-colors shadow-sm"
+          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors"
         >
           + Nueva receta
         </Link>
@@ -98,14 +98,13 @@ export default function RecipesPage() {
           </p>
           <Link
             href="/recipes/new"
-            className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+            className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
           >
             Crear primera receta →
           </Link>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
-          {/* Table header */}
           <div className="grid grid-cols-12 gap-2 px-5 py-3 bg-zinc-50/80 text-[11px] font-medium text-zinc-400 uppercase tracking-wider border-b border-zinc-100">
             <div className="col-span-4">Platillo</div>
             <div className="col-span-2 text-right">Venta</div>
@@ -113,7 +112,6 @@ export default function RecipesPage() {
             <div className="col-span-2 text-right">Margen</div>
             <div className="col-span-2 text-right">% Costo</div>
           </div>
-          {/* Rows */}
           {recipes.map((recipe) => (
             <div
               key={recipe.id}

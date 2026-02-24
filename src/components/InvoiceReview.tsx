@@ -12,7 +12,7 @@ interface InvoiceReviewProps {
 }
 
 const inputClass =
-  "w-full px-3 py-2 bg-zinc-50/50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-colors";
+  "w-full px-3 py-2 bg-zinc-50/50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-colors";
 
 export default function InvoiceReview({
   invoiceId,
@@ -223,7 +223,7 @@ export default function InvoiceReview({
               </h3>
               <button
                 onClick={addLineItem}
-                className="text-xs font-medium text-orange-600 hover:text-orange-700 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors"
+                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 transition-colors"
               >
                 + Agregar
               </button>
@@ -235,7 +235,6 @@ export default function InvoiceReview({
                   key={index}
                   className="border border-zinc-100 rounded-xl p-3.5 space-y-3 group hover:border-zinc-200 transition-colors"
                 >
-                  {/* Confidence + delete */}
                   <div className="flex items-center justify-between">
                     <span
                       className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${getConfidenceColor(item.confidence)}`}
@@ -250,7 +249,6 @@ export default function InvoiceReview({
                     </button>
                   </div>
 
-                  {/* Description */}
                   <input
                     type="text"
                     value={item.description}
@@ -261,7 +259,6 @@ export default function InvoiceReview({
                     placeholder="Descripción del producto"
                   />
 
-                  {/* Quantity / Unit / Price row */}
                   <div className="grid grid-cols-4 gap-2">
                     <div>
                       <label className="block text-[11px] text-zinc-400 mb-1">
@@ -364,7 +361,7 @@ export default function InvoiceReview({
           <button
             onClick={handleConfirm}
             disabled={isConfirming || lineItems.length === 0}
-            className="px-5 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-300 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm"
+            className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 disabled:cursor-not-allowed rounded-xl transition-all"
           >
             {isConfirming ? "Guardando..." : "Confirmar factura"}
           </button>
