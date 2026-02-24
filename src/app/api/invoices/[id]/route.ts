@@ -1,5 +1,5 @@
 // app/api/invoices/[id]/route.ts
-// Fetch a single invoice with all its line items
+// Fetch a single invoice with all its line items (restaurant-scoped)
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -10,6 +10,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const restaurantId = searchParams.get("restaurantId");
+
     const invoice = await prisma.invoice.findUnique({
       where: { id },
       include: {
@@ -18,7 +21,7 @@ export async function GET(
       },
     });
 
-    if (!invoice) {
+    if (!invoice || (restaurantId && invoice.restaurantId !== restaurantId)) {
       return NextResponse.json(
         { error: "Invoice not found" },
         { status: 404 }
