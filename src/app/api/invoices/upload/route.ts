@@ -39,6 +39,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 10 MB server-side limit
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json(
+        { error: "File exceeds 10 MB limit" },
+        { status: 400 }
+      );
+    }
+
     // Save file to local storage
     // FUTURE: Replace with S3/Cloudflare R2 for production
     const uploadsDir = path.join(process.cwd(), "public", "uploads");
@@ -93,9 +102,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Invoice upload error:", error);
-    return NextResponse.json(
-      { error: "Failed to process invoice" },
-      { status: 500 }
-    );
+    const message =
+      error instanceof Error ? error.message : "Failed to process invoice";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
