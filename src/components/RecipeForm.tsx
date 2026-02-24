@@ -33,6 +33,9 @@ interface RecipeFormProps {
   } | null;
 }
 
+const inputClass =
+  "w-full px-3 py-2 bg-zinc-50/50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-colors";
+
 export default function RecipeForm({
   restaurantId,
   onSaved,
@@ -50,7 +53,6 @@ export default function RecipeForm({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch available ingredients
   useEffect(() => {
     fetch(`/api/ingredients?restaurantId=${restaurantId}`)
       .then((r) => r.json())
@@ -67,16 +69,17 @@ export default function RecipeForm({
       .catch(console.error);
   }, [restaurantId]);
 
-  // Calculated metrics
   const totalFoodCost = useMemo(
     () => items.reduce((sum, item) => sum + item.itemCost, 0),
     [items]
   );
 
-  const costPerPortion = recipeYield > 0 ? totalFoodCost / recipeYield : totalFoodCost;
+  const costPerPortion =
+    recipeYield > 0 ? totalFoodCost / recipeYield : totalFoodCost;
   const margin = sellPrice - costPerPortion;
   const marginPercent = sellPrice > 0 ? (margin / sellPrice) * 100 : 0;
-  const foodCostPercent = sellPrice > 0 ? (costPerPortion / sellPrice) * 100 : 0;
+  const foodCostPercent =
+    sellPrice > 0 ? (costPerPortion / sellPrice) * 100 : 0;
 
   const getFoodCostColor = (pct: number) => {
     if (pct <= 28) return "text-emerald-600";
@@ -193,7 +196,6 @@ export default function RecipeForm({
     }
   };
 
-  // Group ingredients by category for the dropdown
   const groupedIngredients = useMemo(() => {
     const groups: Record<string, Ingredient[]> = {};
     ingredients.forEach((ing) => {
@@ -209,7 +211,7 @@ export default function RecipeForm({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900">
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
             {editRecipe ? "Editar receta" : "Nueva receta"}
           </h2>
           <p className="text-sm text-zinc-500 mt-1">
@@ -218,7 +220,7 @@ export default function RecipeForm({
         </div>
         <button
           onClick={onCancel}
-          className="text-sm text-zinc-500 hover:text-zinc-700 px-4 py-2 rounded-lg hover:bg-zinc-100"
+          className="text-sm text-zinc-500 hover:text-zinc-700 px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
         >
           Cancelar
         </button>
@@ -226,39 +228,39 @@ export default function RecipeForm({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Form */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-4">
           {/* Recipe info */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 space-y-4">
-            <h3 className="font-semibold text-zinc-800 text-sm uppercase tracking-wide">
+          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4">
+            <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
               Información del platillo
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-xs font-medium text-zinc-500 mb-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
                   Nombre del platillo
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                  className={inputClass}
                   placeholder="Tacos al Pastor (orden de 3)"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
                   Categoría
                 </label>
                 <input
                   type="text"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                  className={inputClass}
                   placeholder="Tacos, Bebidas, Postres..."
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
                   Precio de venta (MXN)
                 </label>
                 <input
@@ -268,12 +270,12 @@ export default function RecipeForm({
                   onChange={(e) =>
                     setSellPrice(parseFloat(e.target.value) || 0)
                   }
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                  className={inputClass}
                   placeholder="75.00"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
                   Porciones por receta
                 </label>
                 <input
@@ -283,36 +285,51 @@ export default function RecipeForm({
                   onChange={(e) =>
                     setRecipeYield(parseInt(e.target.value) || 1)
                   }
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                  className={inputClass}
                 />
               </div>
             </div>
           </div>
 
           {/* Ingredients list */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 space-y-4">
+          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-zinc-800 text-sm uppercase tracking-wide">
+              <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
                 Ingredientes ({items.length})
               </h3>
               <button
                 onClick={addItem}
-                className="text-xs font-medium text-orange-600 hover:text-orange-700 px-3 py-1.5 rounded-lg hover:bg-orange-50"
+                className="text-xs font-medium text-orange-600 hover:text-orange-700 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors"
               >
-                + Agregar ingrediente
+                + Agregar
               </button>
             </div>
 
             {items.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-sm text-zinc-400">
+              <div className="text-center py-10">
+                <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <svg
+                    className="w-6 h-6 text-zinc-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4.5v15m7.5-7.5h-15"
+                    />
+                  </svg>
+                </div>
+                <p className="text-sm text-zinc-500 mb-1">
                   Agrega ingredientes para calcular el costo
                 </p>
                 <button
                   onClick={addItem}
-                  className="mt-3 text-sm text-orange-600 hover:text-orange-700 font-medium"
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
                 >
-                  + Agregar primer ingrediente
+                  Agregar primer ingrediente
                 </button>
               </div>
             ) : (
@@ -320,15 +337,14 @@ export default function RecipeForm({
                 {items.map((item, index) => (
                   <div
                     key={index}
-                    className="border border-zinc-200 rounded-lg p-3 space-y-2 group"
+                    className="border border-zinc-100 rounded-xl p-3 group hover:border-zinc-200 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      {/* Ingredient selector */}
                       <div className="flex-1">
                         <select
                           value={item.ingredientId}
                           onChange={(e) => updateItem(index, e.target.value)}
-                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                          className={inputClass}
                         >
                           <option value="">Seleccionar ingrediente...</option>
                           {Object.entries(groupedIngredients).map(
@@ -336,7 +352,9 @@ export default function RecipeForm({
                               <optgroup key={cat} label={cat}>
                                 {ings.map((ing) => (
                                   <option key={ing.id} value={ing.id}>
-                                    {ing.name} — ${ing.currentPrice?.toFixed(2) ?? "?"}/{ing.unit}
+                                    {ing.name} — $
+                                    {ing.currentPrice?.toFixed(2) ?? "?"}/
+                                    {ing.unit}
                                   </option>
                                 ))}
                               </optgroup>
@@ -345,7 +363,6 @@ export default function RecipeForm({
                         </select>
                       </div>
 
-                      {/* Quantity */}
                       <div className="w-24">
                         <input
                           type="number"
@@ -358,28 +375,35 @@ export default function RecipeForm({
                               parseFloat(e.target.value) || 0
                             )
                           }
-                          className="w-full px-2 py-2 border border-zinc-200 rounded-lg text-sm text-center focus:ring-2 focus:ring-orange-500 outline-none"
+                          className={`${inputClass} text-center`}
                           placeholder="0.150"
                         />
                       </div>
 
-                      {/* Unit (read-only, from ingredient) */}
-                      <div className="w-14 text-center text-sm text-zinc-500">
+                      <div className="w-12 text-center text-xs text-zinc-400">
                         {item.unit}
                       </div>
 
-                      {/* Cost */}
-                      <div className="w-24 text-right text-sm font-medium text-zinc-700">
+                      <div className="w-20 text-right text-sm font-medium text-zinc-700 tabular-nums">
                         ${item.itemCost.toFixed(2)}
                       </div>
 
-                      {/* Remove */}
                       <button
                         onClick={() => removeItem(index)}
-                        className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-opacity p-1"
+                        className="opacity-0 group-hover:opacity-100 text-zinc-300 hover:text-red-500 transition-all p-1"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -392,20 +416,22 @@ export default function RecipeForm({
 
         {/* Right: Live cost calculator */}
         <div className="space-y-4">
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 space-y-5 sticky top-6">
-            <h3 className="font-semibold text-zinc-800 text-sm uppercase tracking-wide">
+          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-5 sticky top-20">
+            <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
               Análisis de costo
             </h3>
 
             {/* Food cost gauge */}
-            <div className="text-center py-4">
+            <div className="text-center py-3">
               <div
-                className={`text-4xl font-bold ${getFoodCostColor(foodCostPercent)}`}
+                className={`text-4xl font-bold tabular-nums ${getFoodCostColor(foodCostPercent)}`}
               >
                 {foodCostPercent.toFixed(1)}%
               </div>
-              <div className="text-xs text-zinc-500 mt-1">Costo de materia prima</div>
-              <div className="mt-2 w-full bg-zinc-100 rounded-full h-2">
+              <div className="text-xs text-zinc-400 mt-1">
+                Costo de materia prima
+              </div>
+              <div className="mt-3 w-full bg-zinc-100 rounded-full h-2">
                 <div
                   className={`h-2 rounded-full transition-all duration-300 ${
                     foodCostPercent <= 28
@@ -417,42 +443,42 @@ export default function RecipeForm({
                   style={{ width: `${Math.min(foodCostPercent, 100)}%` }}
                 />
               </div>
-              <div className="flex justify-between text-xs text-zinc-400 mt-1">
+              <div className="flex justify-between text-[10px] text-zinc-300 mt-1 px-0.5">
                 <span>0%</span>
-                <span className="text-emerald-500">28%</span>
-                <span className="text-amber-500">35%</span>
+                <span className="text-emerald-400">28%</span>
+                <span className="text-amber-400">35%</span>
                 <span>50%+</span>
               </div>
             </div>
 
             {/* Breakdown */}
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between items-center py-2 border-b border-zinc-100">
+            <div className="space-y-0 text-sm divide-y divide-zinc-100">
+              <div className="flex justify-between items-center py-2.5">
                 <span className="text-zinc-500">Precio de venta</span>
-                <span className="font-semibold text-zinc-800">
+                <span className="font-semibold text-zinc-800 tabular-nums">
                   ${sellPrice.toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-zinc-100">
+              <div className="flex justify-between items-center py-2.5">
                 <span className="text-zinc-500">Costo total receta</span>
-                <span className="font-medium text-zinc-700">
+                <span className="font-medium text-zinc-700 tabular-nums">
                   ${totalFoodCost.toFixed(2)}
                 </span>
               </div>
               {recipeYield > 1 && (
-                <div className="flex justify-between items-center py-2 border-b border-zinc-100">
+                <div className="flex justify-between items-center py-2.5">
                   <span className="text-zinc-500">
                     Costo por porción (÷{recipeYield})
                   </span>
-                  <span className="font-medium text-zinc-700">
+                  <span className="font-medium text-zinc-700 tabular-nums">
                     ${costPerPortion.toFixed(2)}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between items-center py-2">
+              <div className="flex justify-between items-center py-2.5">
                 <span className="text-zinc-500">Margen bruto</span>
                 <span
-                  className={`font-bold text-lg ${
+                  className={`font-bold text-lg tabular-nums ${
                     margin >= 0 ? "text-emerald-600" : "text-red-600"
                   }`}
                 >
@@ -466,7 +492,7 @@ export default function RecipeForm({
 
             {/* Health indicator */}
             <div
-              className={`rounded-lg p-3 text-xs ${
+              className={`rounded-xl p-3 text-xs leading-relaxed ${
                 foodCostPercent <= 28
                   ? "bg-emerald-50 text-emerald-700"
                   : foodCostPercent <= 35
@@ -475,16 +501,29 @@ export default function RecipeForm({
               }`}
             >
               {foodCostPercent <= 28
-                ? "✓ Excelente margen. Este platillo es muy rentable."
+                ? "Excelente margen. Este platillo es muy rentable."
                 : foodCostPercent <= 35
-                  ? "⚠ Margen aceptable pero hay espacio para optimizar."
-                  : "✗ Costo alto. Considera ajustar porciones o precio de venta."}
+                  ? "Margen aceptable pero hay espacio para optimizar."
+                  : "Costo alto. Considera ajustar porciones o precio de venta."}
             </div>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200/80 rounded-xl">
+              <svg
+                className="w-4 h-4 text-red-500 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+                />
+              </svg>
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
@@ -493,13 +532,13 @@ export default function RecipeForm({
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full py-3 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-300 rounded-xl transition-colors shadow-sm"
+            className="w-full py-2.5 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-300 rounded-xl transition-all shadow-sm active:scale-[0.98]"
           >
             {isSaving
               ? "Guardando..."
               : editRecipe
                 ? "Actualizar receta"
-                : "Guardar receta ✓"}
+                : "Guardar receta"}
           </button>
         </div>
       </div>

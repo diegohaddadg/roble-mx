@@ -11,6 +11,9 @@ interface InvoiceReviewProps {
   onCancel: () => void;
 }
 
+const inputClass =
+  "w-full px-3 py-2 bg-zinc-50/50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-colors";
+
 export default function InvoiceReview({
   invoiceId,
   imageUrl,
@@ -41,7 +44,6 @@ export default function InvoiceReview({
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
 
-      // Recalculate totalPrice if quantity or unitPrice changed
       if (field === "quantity" || field === "unitPrice") {
         const qty =
           field === "quantity" ? Number(value) : updated[index].quantity;
@@ -98,7 +100,7 @@ export default function InvoiceReview({
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
             ingredientId: null,
-            ingredientName: item.description, // auto-create ingredient from description
+            ingredientName: item.description,
           })),
         }),
       });
@@ -113,9 +115,11 @@ export default function InvoiceReview({
   };
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.9) return "bg-emerald-100 text-emerald-700";
-    if (confidence >= 0.7) return "bg-amber-100 text-amber-700";
-    return "bg-red-100 text-red-700";
+    if (confidence >= 0.9)
+      return "bg-emerald-50 text-emerald-700 border-emerald-200/80";
+    if (confidence >= 0.7)
+      return "bg-amber-50 text-amber-700 border-amber-200/80";
+    return "bg-red-50 text-red-700 border-red-200/80";
   };
 
   return (
@@ -123,7 +127,7 @@ export default function InvoiceReview({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900">
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
             Revisar factura
           </h2>
           <p className="text-sm text-zinc-500 mt-1">
@@ -132,93 +136,96 @@ export default function InvoiceReview({
         </div>
         <button
           onClick={onCancel}
-          className="text-sm text-zinc-500 hover:text-zinc-700 px-4 py-2 rounded-lg hover:bg-zinc-100 transition-colors"
+          className="text-sm text-zinc-500 hover:text-zinc-700 px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
         >
           Cancelar
         </button>
       </div>
 
-      {/* Two-column layout: image + data */}
+      {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Invoice image */}
-        <div className="bg-zinc-100 rounded-xl p-4 flex items-center justify-center min-h-[400px]">
+        <div className="bg-white rounded-2xl border border-zinc-100 p-4 flex items-center justify-center min-h-[400px]">
           {imageUrl ? (
             <img
               src={imageUrl}
               alt="Factura escaneada"
-              className="max-w-full max-h-[600px] object-contain rounded-lg shadow-sm"
+              className="max-w-full max-h-[600px] object-contain rounded-xl"
             />
           ) : (
-            <p className="text-zinc-400">Vista previa no disponible</p>
+            <p className="text-zinc-400 text-sm">Vista previa no disponible</p>
           )}
         </div>
 
         {/* Right: Extracted data */}
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Invoice header fields */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 space-y-4">
-            <h3 className="font-semibold text-zinc-800 text-sm uppercase tracking-wide">
+          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4">
+            <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
               Datos de la factura
             </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
                   Proveedor
                 </label>
                 <input
                   type="text"
                   value={supplierName}
                   onChange={(e) => setSupplierName(e.target.value)}
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                  className={inputClass}
                   placeholder="Nombre del proveedor"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
                   No. Factura
                 </label>
                 <input
                   type="text"
                   value={invoiceNumber}
                   onChange={(e) => setInvoiceNumber(e.target.value)}
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                  className={inputClass}
                   placeholder="F-2024-001"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
                   Fecha
                 </label>
                 <input
                   type="date"
                   value={invoiceDate}
                   onChange={(e) => setInvoiceDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
                   Total calculado
                 </label>
-                <div className="px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm font-semibold text-zinc-700">
-                  ${calculatedTotal.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN
+                <div className="px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-semibold text-zinc-800">
+                  $
+                  {calculatedTotal.toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                  })}{" "}
+                  MXN
                 </div>
               </div>
             </div>
           </div>
 
           {/* Line items */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 space-y-4">
+          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-zinc-800 text-sm uppercase tracking-wide">
+              <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
                 Productos ({lineItems.length})
               </h3>
               <button
                 onClick={addLineItem}
-                className="text-xs font-medium text-orange-600 hover:text-orange-700 px-3 py-1.5 rounded-lg hover:bg-orange-50 transition-colors"
+                className="text-xs font-medium text-orange-600 hover:text-orange-700 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors"
               >
-                + Agregar producto
+                + Agregar
               </button>
             </div>
 
@@ -226,18 +233,18 @@ export default function InvoiceReview({
               {lineItems.map((item, index) => (
                 <div
                   key={index}
-                  className="border border-zinc-200 rounded-lg p-4 space-y-3 relative group"
+                  className="border border-zinc-100 rounded-xl p-3.5 space-y-3 group hover:border-zinc-200 transition-colors"
                 >
-                  {/* Confidence badge */}
+                  {/* Confidence + delete */}
                   <div className="flex items-center justify-between">
                     <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${getConfidenceColor(item.confidence)}`}
+                      className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${getConfidenceColor(item.confidence)}`}
                     >
                       {Math.round(item.confidence * 100)}% confianza
                     </span>
                     <button
                       onClick={() => removeLineItem(index)}
-                      className="opacity-0 group-hover:opacity-100 text-xs text-red-500 hover:text-red-700 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 text-xs text-red-500 hover:text-red-700 transition-all"
                     >
                       Eliminar
                     </button>
@@ -250,14 +257,14 @@ export default function InvoiceReview({
                     onChange={(e) =>
                       updateLineItem(index, "description", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                    className={`${inputClass} font-medium`}
                     placeholder="Descripción del producto"
                   />
 
                   {/* Quantity / Unit / Price row */}
                   <div className="grid grid-cols-4 gap-2">
                     <div>
-                      <label className="block text-xs text-zinc-400 mb-1">
+                      <label className="block text-[11px] text-zinc-400 mb-1">
                         Cantidad
                       </label>
                       <input
@@ -271,11 +278,11 @@ export default function InvoiceReview({
                             parseFloat(e.target.value) || 0
                           )
                         }
-                        className="w-full px-2 py-1.5 border border-zinc-200 rounded-lg text-sm text-center focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                        className={`${inputClass} text-center`}
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-zinc-400 mb-1">
+                      <label className="block text-[11px] text-zinc-400 mb-1">
                         Unidad
                       </label>
                       <select
@@ -283,7 +290,7 @@ export default function InvoiceReview({
                         onChange={(e) =>
                           updateLineItem(index, "unit", e.target.value)
                         }
-                        className="w-full px-2 py-1.5 border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                        className={inputClass}
                       >
                         <option value="kg">kg</option>
                         <option value="L">L</option>
@@ -295,7 +302,7 @@ export default function InvoiceReview({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs text-zinc-400 mb-1">
+                      <label className="block text-[11px] text-zinc-400 mb-1">
                         $/unidad
                       </label>
                       <input
@@ -309,15 +316,18 @@ export default function InvoiceReview({
                             parseFloat(e.target.value) || 0
                           )
                         }
-                        className="w-full px-2 py-1.5 border border-zinc-200 rounded-lg text-sm text-center focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                        className={`${inputClass} text-center`}
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-zinc-400 mb-1">
+                      <label className="block text-[11px] text-zinc-400 mb-1">
                         Total
                       </label>
-                      <div className="px-2 py-1.5 bg-zinc-50 border border-zinc-100 rounded-lg text-sm text-center font-medium text-zinc-600">
-                        ${item.totalPrice.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                      <div className="px-2 py-2 bg-zinc-50 border border-zinc-100 rounded-xl text-sm text-center font-medium text-zinc-700">
+                        $
+                        {item.totalPrice.toLocaleString("es-MX", {
+                          minimumFractionDigits: 2,
+                        })}
                       </div>
                     </div>
                   </div>
@@ -328,29 +338,35 @@ export default function InvoiceReview({
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex items-center justify-between pt-4 border-t border-zinc-200">
-        <div className="text-sm text-zinc-500">
-          <span className="font-medium text-zinc-700">{lineItems.length}</span>{" "}
-          productos •{" "}
+      {/* Action bar */}
+      <div className="flex items-center justify-between pt-5 border-t border-zinc-200">
+        <p className="text-sm text-zinc-500">
           <span className="font-medium text-zinc-700">
-            ${calculatedTotal.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN
+            {lineItems.length}
+          </span>{" "}
+          productos ·{" "}
+          <span className="font-medium text-zinc-700">
+            $
+            {calculatedTotal.toLocaleString("es-MX", {
+              minimumFractionDigits: 2,
+            })}{" "}
+            MXN
           </span>{" "}
           total
-        </div>
+        </p>
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="px-6 py-2.5 text-sm font-medium text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors"
+            className="px-5 py-2 text-sm font-medium text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors"
           >
             Descartar
           </button>
           <button
             onClick={handleConfirm}
             disabled={isConfirming || lineItems.length === 0}
-            className="px-6 py-2.5 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-300 disabled:cursor-not-allowed rounded-xl transition-colors shadow-sm"
+            className="px-5 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-300 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm"
           >
-            {isConfirming ? "Guardando..." : "Confirmar factura ✓"}
+            {isConfirming ? "Guardando..." : "Confirmar factura"}
           </button>
         </div>
       </div>

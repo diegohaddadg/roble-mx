@@ -31,20 +31,35 @@ export default function ScannerPage() {
   return (
     <div className="space-y-8">
       <div className="text-center max-w-xl mx-auto">
-        <h1 className="text-3xl font-bold text-zinc-900 mb-3">
+        <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-2">
           Escáner de facturas
         </h1>
-        <p className="text-zinc-500">
+        <p className="text-zinc-500 text-sm sm:text-base">
           Toma una foto de la factura de tu proveedor. La IA extrae todos los
           productos, cantidades y precios automáticamente.
         </p>
       </div>
+
       <InvoiceUpload
         restaurantId={restaurantId}
         onUploadComplete={setCurrentUpload}
       />
+
       {confirmedCount > 0 && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+        <div className="flex items-center justify-center gap-2 py-3 px-4 bg-emerald-50 border border-emerald-200/80 rounded-xl">
+          <svg
+            className="w-4 h-4 text-emerald-600 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m4.5 12.75 6 6 9-13.5"
+            />
+          </svg>
           <p className="text-sm text-emerald-700">
             {confirmedCount} factura
             {confirmedCount !== 1 ? "s" : ""} procesada
