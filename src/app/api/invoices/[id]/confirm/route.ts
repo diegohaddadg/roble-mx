@@ -1,0 +1,174 @@
+// app/api/invoices/[id]/confirm/route.ts
+// v2: Zod validation + $transaction to prevent partial writes
+
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { confirmInvoiceSchema } from "@/lib/validations";
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: invoiceId } = await params;
+
+    // 1. Parse and validate input
+    const rawBody = await request.json();
+    const parseResult = confirmInvoiceSchema.safeParse(rawBody);
+
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          error: "Datos inválidos",
+          details: parseResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const body = parseResult.data;
+
+    // 2. Verify invoice exists and is pending
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: invoiceId },
+    });
+
+    if (!invoice) {
+      return NextResponse.json(
+        { error: "Factura no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    if (invoice.status === "CONFIRMED") {
+      return NextResponse.json(
+        { error: "Esta factura ya fue confirmada" },
+        { status: 400 }
+      );
+    }
+
+    // 3. Run everything in a transaction — all or nothing
+    const result = await prisma.$transaction(async (tx) => {
+      // Handle supplier
+      let supplierId = body.supplierId;
+      if (!supplierId && body.supplierName) {
+        const newSupplier = await tx.supplier.create({
+          data: {
+            name: body.supplierName,
+            restaurantId: invoice.restaurantId,
+          },
+        });
+        supplierId = newSupplier.id;
+      }
+
+      // Process each line item
+      const processedItems = [];
+      for (const item of body.lineItems) {
+        let ingredientId = item.ingredientId;
+
+        // Create new ingredient if needed
+        if (!ingredientId && item.ingredientName) {
+          // Check if ingredient already exists (by name)
+          const existing = await tx.ingredient.findUnique({
+            where: {
+              name_restaurantId: {
+                name: item.ingredientName,
+                restaurantId: invoice.restaurantId,
+              },
+            },
+          });
+
+          if (existing) {
+            ingredientId = existing.id;
+          } else {
+            const newIngredient = await tx.ingredient.create({
+              data: {
+                name: item.ingredientName,
+                unit: item.unit,
+                currentPrice: item.unitPrice,
+                restaurantId: invoice.restaurantId,
+              },
+            });
+            ingredientId = newIngredient.id;
+          }
+        }
+
+        // Update ingredient current price
+        if (ingredientId) {
+          await tx.ingredient.update({
+            where: { id: ingredientId },
+            data: { currentPrice: item.unitPrice },
+          });
+
+          // Create price history record
+          await tx.priceHistory.create({
+            data: {
+              price: item.unitPrice,
+              date: body.invoiceDate
+                ? new Date(body.invoiceDate)
+                : new Date(),
+              supplierId: supplierId,
+              ingredientId: ingredientId,
+              invoiceId: invoiceId,
+            },
+          });
+        }
+
+        processedItems.push({
+          description: item.description,
+          quantity: item.quantity,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          ingredientId: ingredientId,
+        });
+      }
+
+      // Delete old AI-extracted line items
+      await tx.lineItem.deleteMany({
+        where: { invoiceId },
+      });
+
+      // Create confirmed line items
+      await tx.lineItem.createMany({
+        data: processedItems.map((item) => ({
+          invoiceId,
+          description: item.description,
+          quantity: item.quantity,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          ingredientId: item.ingredientId,
+        })),
+      });
+
+      // Update invoice to CONFIRMED
+      const updatedInvoice = await tx.invoice.update({
+        where: { id: invoiceId },
+        data: {
+          status: "CONFIRMED",
+          supplierId,
+          invoiceNumber: body.invoiceNumber,
+          invoiceDate: body.invoiceDate ? new Date(body.invoiceDate) : null,
+          subtotal: body.subtotal,
+          tax: body.tax,
+          total: body.total,
+        },
+        include: {
+          lineItems: { include: { ingredient: true } },
+          supplier: true,
+        },
+      });
+
+      return updatedInvoice;
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Invoice confirm error:", error);
+    return NextResponse.json(
+      { error: "Error al confirmar factura" },
+      { status: 500 }
+    );
+  }
+}

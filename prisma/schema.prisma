@@ -1,0 +1,180 @@
+// Toast MX — Phase 1: AI Inventory & Cost Intelligence
+// v2: Fixed monetary types (Decimal), added indexes, added recipe yield
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── RESTAURANT ────────────────────────────────────────────
+model Restaurant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  address   String?
+  city      String   @default("CDMX")
+  state     String   @default("Ciudad de México")
+  phone     String?
+  email     String?
+  ownerId   String?  // future: link to auth user
+  currency  String   @default("MXN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  suppliers    Supplier[]
+  ingredients  Ingredient[]
+  invoices     Invoice[]
+  recipes      Recipe[]
+
+  @@map("restaurants")
+}
+
+// ─── SUPPLIER ──────────────────────────────────────────────
+model Supplier {
+  id           String   @id @default(cuid())
+  name         String
+  contactName  String?
+  phone        String?
+  email        String?
+  address      String?
+  notes        String?
+  restaurantId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  invoices   Invoice[]
+
+  @@index([restaurantId])
+  @@map("suppliers")
+}
+
+// ─── INGREDIENT ────────────────────────────────────────────
+model Ingredient {
+  id           String   @id @default(cuid())
+  name         String
+  category     String?
+  unit         String
+  currentPrice Decimal? @db.Decimal(10, 2) // ← FIXED: Decimal instead of Float
+  restaurantId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  lineItems    LineItem[]
+  priceHistory PriceHistory[]
+  recipeItems  RecipeItem[]
+
+  @@unique([name, restaurantId])
+  @@index([restaurantId])
+  @@index([category])
+  @@map("ingredients")
+}
+
+// ─── INVOICE ───────────────────────────────────────────────
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String?
+  invoiceDate   DateTime?
+  subtotal      Decimal?      @db.Decimal(10, 2)
+  tax           Decimal?      @db.Decimal(10, 2)
+  total         Decimal?      @db.Decimal(10, 2)
+  status        InvoiceStatus @default(PENDING_REVIEW)
+  imageUrl      String?
+  rawExtraction Json?
+  restaurantId  String
+  supplierId    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  supplier   Supplier?  @relation(fields: [supplierId], references: [id])
+  lineItems  LineItem[]
+
+  @@index([restaurantId])
+  @@index([restaurantId, status])
+  @@index([supplierId])
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  PENDING_REVIEW
+  CONFIRMED
+  REJECTED
+}
+
+// ─── LINE ITEM ─────────────────────────────────────────────
+model LineItem {
+  id           String   @id @default(cuid())
+  description  String
+  quantity     Decimal  @db.Decimal(10, 3) // 3 decimals for grams precision
+  unit         String
+  unitPrice    Decimal  @db.Decimal(10, 2)
+  totalPrice   Decimal  @db.Decimal(10, 2)
+  confidence   Float?
+  invoiceId    String
+  ingredientId String?
+
+  invoice    Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  ingredient Ingredient? @relation(fields: [ingredientId], references: [id])
+
+  @@index([invoiceId])
+  @@index([ingredientId])
+  @@map("line_items")
+}
+
+// ─── PRICE HISTORY ─────────────────────────────────────────
+model PriceHistory {
+  id           String   @id @default(cuid())
+  price        Decimal  @db.Decimal(10, 2)
+  date         DateTime
+  supplierId   String?
+  ingredientId String
+  invoiceId    String?  // ← NEW: link back to the invoice that recorded this price
+  createdAt    DateTime @default(now())
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([ingredientId])
+  @@index([ingredientId, date])
+  @@map("price_history")
+}
+
+// ─── RECIPE ────────────────────────────────────────────────
+model Recipe {
+  id           String   @id @default(cuid())
+  name         String
+  category     String?
+  sellPrice    Decimal? @db.Decimal(10, 2)
+  yield        Int      @default(1) // ← NEW: how many portions this recipe makes
+  isActive     Boolean  @default(true) // ← NEW: soft delete / hide from menu
+  restaurantId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  items      RecipeItem[]
+
+  @@index([restaurantId])
+  @@index([restaurantId, isActive])
+  @@map("recipes")
+}
+
+// ─── RECIPE ITEM ───────────────────────────────────────────
+model RecipeItem {
+  id           String  @id @default(cuid())
+  quantity     Decimal @db.Decimal(10, 3)
+  unit         String
+  ingredientId String
+  recipeId     String
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+  recipe     Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@map("recipe_items")
+}
