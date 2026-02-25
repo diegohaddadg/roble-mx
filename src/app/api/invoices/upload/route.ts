@@ -25,6 +25,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate restaurantId exists in DB
+    let validRestaurantId = restaurantId;
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { id: restaurantId },
+      select: { id: true },
+    });
+
+    if (!restaurant) {
+      if (process.env.NODE_ENV !== "production") {
+        const fallback = await prisma.restaurant.findFirst({
+          select: { id: true },
+        });
+        if (fallback) {
+          console.warn(
+            `[upload] restaurantId "${restaurantId}" not found — using fallback "${fallback.id}" (dev mode)`
+          );
+          validRestaurantId = fallback.id;
+        } else {
+          return NextResponse.json(
+            {
+              error:
+                "No existe ningún restaurante. Ejecuta npx prisma db seed primero.",
+            },
+            { status: 400 }
+          );
+        }
+      } else {
+        return NextResponse.json(
+          {
+            error:
+              "Restaurante no encontrado. Actualiza tu restaurantId después de reseed.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Validate file type
     const allowedTypes = [
       "image/jpeg",
@@ -68,7 +105,7 @@ export async function POST(request: NextRequest) {
     // Create invoice record with PENDING_REVIEW status
     const invoice = await prisma.invoice.create({
       data: {
-        restaurantId,
+        restaurantId: validRestaurantId,
         imageUrl,
         invoiceNumber: extraction.invoiceNumber,
         invoiceDate: extraction.invoiceDate
@@ -99,6 +136,9 @@ export async function POST(request: NextRequest) {
       invoiceId: invoice.id,
       imageUrl,
       extraction,
+      ...(validRestaurantId !== restaurantId
+        ? { usedFallbackRestaurantId: validRestaurantId }
+        : {}),
     });
   } catch (error) {
     console.error("Invoice upload error:", error);
