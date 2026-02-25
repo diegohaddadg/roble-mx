@@ -79,8 +79,8 @@ export default function InvoiceDetailPage() {
         <div className="h-5 bg-zinc-200/60 rounded w-40" />
         <div className="h-7 bg-zinc-200/60 rounded-lg w-64" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-64 bg-white rounded-2xl border border-zinc-100" />
-          <div className="h-64 bg-white rounded-2xl border border-zinc-100" />
+          <div className="h-64 bg-[var(--card)] rounded-2xl border border-[var(--border-light)]" />
+          <div className="h-64 bg-[var(--card)] rounded-2xl border border-[var(--border-light)]" />
         </div>
       </div>
     );
@@ -89,9 +89,9 @@ export default function InvoiceDetailPage() {
   if (notFound || !invoice) {
     return (
       <div className="text-center py-20">
-        <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-14 h-14 bg-[var(--border-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
           <svg
-            className="w-7 h-7 text-zinc-400"
+            className="w-7 h-7 text-[var(--muted)]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -104,15 +104,15 @@ export default function InvoiceDetailPage() {
             />
           </svg>
         </div>
-        <h3 className="font-semibold text-zinc-700 mb-1">
+        <h3 className="font-semibold text-[var(--text)] mb-1">
           Factura no encontrada
         </h3>
-        <p className="text-sm text-zinc-500 mb-5">
+        <p className="text-sm text-[var(--muted)] mb-5">
           Esta factura no existe o no pertenece a tu restaurante
         </p>
         <Link
           href="/invoices"
-          className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+          className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium"
         >
           ← Volver al historial
         </Link>
@@ -125,7 +125,7 @@ export default function InvoiceDetailPage() {
       {/* Back button */}
       <Link
         href="/invoices"
-        className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors"
       >
         <svg
           className="w-4 h-4"
@@ -145,13 +145,13 @@ export default function InvoiceDetailPage() {
 
       {/* Header */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
+        <h2 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
           {invoice.supplier?.name ?? "Sin proveedor"}
         </h2>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-zinc-500">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-[var(--muted)]">
           {invoice.invoiceNumber && <span>#{invoice.invoiceNumber}</span>}
           <span>{formatDate(invoice.invoiceDate ?? invoice.createdAt)}</span>
-          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200/80">
+          <span className="px-2 py-0.5 bg-[var(--success-light)] text-[var(--success)] text-xs font-medium rounded-full border border-[var(--success)]/20">
             Confirmada
           </span>
         </div>
@@ -161,22 +161,22 @@ export default function InvoiceDetailPage() {
         {/* Left column: image + totals */}
         <div className="space-y-4">
           {/* Totals card */}
-          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-0 divide-y divide-zinc-100">
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-5 space-y-0 divide-y divide-[var(--border-light)]">
             <div className="flex justify-between items-center py-2.5 first:pt-0">
-              <span className="text-sm text-zinc-500">Subtotal</span>
-              <span className="text-sm font-medium text-zinc-700 tabular-nums">
+              <span className="text-sm text-[var(--muted)]">Subtotal</span>
+              <span className="text-sm font-medium text-[var(--text)] tabular-nums">
                 {fmtMoney(invoice.subtotal)}
               </span>
             </div>
             <div className="flex justify-between items-center py-2.5">
-              <span className="text-sm text-zinc-500">IVA</span>
-              <span className="text-sm font-medium text-zinc-700 tabular-nums">
+              <span className="text-sm text-[var(--muted)]">IVA</span>
+              <span className="text-sm font-medium text-[var(--text)] tabular-nums">
                 {fmtMoney(invoice.tax)}
               </span>
             </div>
             <div className="flex justify-between items-center py-2.5 last:pb-0">
-              <span className="text-sm font-medium text-zinc-800">Total</span>
-              <span className="text-lg font-bold text-zinc-900 tabular-nums">
+              <span className="text-sm font-medium text-[var(--text)]">Total</span>
+              <span className="text-lg font-bold text-[var(--text)] tabular-nums">
                 {fmtMoney(invoice.total)}
               </span>
             </div>
@@ -184,8 +184,8 @@ export default function InvoiceDetailPage() {
 
           {/* Scanned image */}
           {invoice.imageUrl && (
-            <div className="bg-white rounded-2xl border border-zinc-100 p-4">
-              <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3">
+            <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-4">
+              <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide mb-3">
                 Imagen escaneada
               </h3>
               <img
@@ -199,13 +199,13 @@ export default function InvoiceDetailPage() {
 
         {/* Right column: line items */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
-            <div className="px-5 py-3 bg-zinc-50/80 border-b border-zinc-100 flex items-center justify-between">
-              <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm overflow-hidden">
+            <div className="px-5 py-3 bg-[var(--bg)] border-b border-[var(--border-light)] flex items-center justify-between">
+              <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide">
                 Productos ({invoice.lineItems.length})
               </h3>
             </div>
-            <div className="grid grid-cols-12 gap-2 px-5 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wider border-b border-zinc-100">
+            <div className="grid grid-cols-12 gap-2 px-5 py-2.5 text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider border-b border-[var(--border-light)]">
               <div className="col-span-5">Descripción</div>
               <div className="col-span-2 text-right">Cantidad</div>
               <div className="col-span-1 text-center">Unidad</div>
@@ -215,30 +215,30 @@ export default function InvoiceDetailPage() {
             {invoice.lineItems.map((item) => (
               <div
                 key={item.id}
-                className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-zinc-50 last:border-0"
+                className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-[var(--border-light)] last:border-0"
               >
                 <div className="col-span-5">
-                  <div className="text-sm font-medium text-zinc-800">
+                  <div className="text-sm font-medium text-[var(--text)]">
                     {item.description}
                   </div>
                   {item.ingredient && (
-                    <div className="text-xs text-zinc-400 mt-0.5">
+                    <div className="text-xs text-[var(--muted)] mt-0.5">
                       → {item.ingredient.name}
                     </div>
                   )}
                 </div>
-                <div className="col-span-2 text-right text-sm text-zinc-600 tabular-nums">
+                <div className="col-span-2 text-right text-sm text-[var(--muted)] tabular-nums">
                   {Number(item.quantity).toLocaleString("es-MX", {
                     maximumFractionDigits: 3,
                   })}
                 </div>
-                <div className="col-span-1 text-center text-sm text-zinc-500">
+                <div className="col-span-1 text-center text-sm text-[var(--muted)]">
                   {item.unit}
                 </div>
-                <div className="col-span-2 text-right text-sm text-zinc-600 tabular-nums">
+                <div className="col-span-2 text-right text-sm text-[var(--muted)] tabular-nums">
                   ${Number(item.unitPrice).toFixed(2)}
                 </div>
-                <div className="col-span-2 text-right text-sm font-medium text-zinc-800 tabular-nums">
+                <div className="col-span-2 text-right text-sm font-medium text-[var(--text)] tabular-nums">
                   ${Number(item.totalPrice).toFixed(2)}
                 </div>
               </div>

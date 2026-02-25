@@ -73,13 +73,13 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="h-28 bg-white rounded-2xl border border-zinc-100"
+              className="h-28 bg-[var(--card)] rounded-2xl border border-[var(--border-light)]"
             />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-64 bg-white rounded-2xl border border-zinc-100" />
-          <div className="h-64 bg-white rounded-2xl border border-zinc-100" />
+          <div className="h-64 bg-[var(--card)] rounded-2xl border border-[var(--border-light)]" />
+          <div className="h-64 bg-[var(--card)] rounded-2xl border border-[var(--border-light)]" />
         </div>
       </div>
     );
@@ -89,9 +89,9 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 bg-[var(--border-light)] rounded-2xl flex items-center justify-center mx-auto mb-3">
             <svg
-              className="w-6 h-6 text-zinc-400"
+              className="w-6 h-6 text-[var(--muted)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -104,7 +104,7 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
               />
             </svg>
           </div>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-[var(--muted)]">
             No se pudo cargar el dashboard
           </p>
         </div>
@@ -113,25 +113,25 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
   }
 
   const getFoodCostColor = (pct: number) => {
-    if (pct <= 28) return "text-emerald-600";
-    if (pct <= 35) return "text-amber-600";
-    return "text-red-600";
+    if (pct <= 28) return "text-[var(--success)]";
+    if (pct <= 35) return "text-[var(--warning)]";
+    return "text-[var(--danger)]";
   };
 
   const getFoodCostBg = (pct: number) => {
-    if (pct <= 28) return "bg-emerald-50 border-emerald-100";
-    if (pct <= 35) return "bg-amber-50 border-amber-100";
-    return "bg-red-50 border-red-100";
+    if (pct <= 28) return "bg-[var(--success-light)] border-[var(--success)]/20";
+    if (pct <= 35) return "bg-[var(--warning-light)] border-[var(--warning)]/20";
+    return "bg-[var(--danger-light)] border-[var(--danger)]/20";
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
+        <h2 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
           Dashboard
         </h2>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="text-sm text-[var(--muted)] mt-1">
           Resumen de rentabilidad y costos
         </p>
       </div>
@@ -141,7 +141,7 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
         <div
           className={`border rounded-2xl p-4 sm:p-5 ${getFoodCostBg(data.summary.avgFoodCostPercent)}`}
         >
-          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+          <div className="text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
             Costo MP promedio
           </div>
           <div
@@ -149,22 +149,22 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
           >
             {data.summary.avgFoodCostPercent}%
           </div>
-          <div className="text-xs text-zinc-400 mt-1">Meta: &lt;30%</div>
+          <div className="text-xs text-[var(--muted)] mt-1">Meta: &lt;30%</div>
         </div>
 
-        <div className="bg-white border border-zinc-100 rounded-2xl p-4 sm:p-5">
-          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+        <div className="bg-[var(--card)] border border-[var(--border-light)] shadow-sm rounded-2xl p-4 sm:p-5">
+          <div className="text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
             Gasto esta semana
           </div>
-          <div className="text-2xl font-bold text-zinc-900 mt-1.5 tabular-nums">
+          <div className="text-2xl font-bold text-[var(--text)] mt-1.5 tabular-nums">
             ${data.spending.thisWeek.toLocaleString("es-MX")}
           </div>
           {data.spending.weekChange !== 0 && (
             <div
               className={`text-xs mt-1 font-medium ${
                 data.spending.weekChange > 0
-                  ? "text-red-600"
-                  : "text-emerald-600"
+                  ? "text-[var(--danger)]"
+                  : "text-[var(--success)]"
               }`}
             >
               {data.spending.weekChange > 0 ? "↑" : "↓"}{" "}
@@ -173,23 +173,23 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
           )}
         </div>
 
-        <div className="bg-white border border-zinc-100 rounded-2xl p-4 sm:p-5">
-          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+        <div className="bg-[var(--card)] border border-[var(--border-light)] shadow-sm rounded-2xl p-4 sm:p-5">
+          <div className="text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
             Gasto este mes
           </div>
-          <div className="text-2xl font-bold text-zinc-900 mt-1.5 tabular-nums">
+          <div className="text-2xl font-bold text-[var(--text)] mt-1.5 tabular-nums">
             ${data.spending.thisMonth.toLocaleString("es-MX")}
           </div>
         </div>
 
-        <div className="bg-white border border-zinc-100 rounded-2xl p-4 sm:p-5">
-          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+        <div className="bg-[var(--card)] border border-[var(--border-light)] shadow-sm rounded-2xl p-4 sm:p-5">
+          <div className="text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
             Facturas pendientes
           </div>
-          <div className="text-2xl font-bold text-zinc-900 mt-1.5">
+          <div className="text-2xl font-bold text-[var(--text)] mt-1.5">
             {data.summary.pendingInvoices}
           </div>
-          <div className="text-xs text-zinc-400 mt-1">
+          <div className="text-xs text-[var(--muted)] mt-1">
             {data.summary.totalInvoices} confirmadas total
           </div>
         </div>
@@ -197,12 +197,12 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
 
       {/* Two-column: Top + Bottom recipes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white border border-zinc-100 rounded-2xl p-5">
-          <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-4">
+        <div className="bg-[var(--card)] border border-[var(--border-light)] shadow-sm rounded-2xl p-5">
+          <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide mb-4">
             Más rentables
           </h3>
           {data.topProfitable.length === 0 ? (
-            <p className="text-sm text-zinc-400 py-6 text-center">
+            <p className="text-sm text-[var(--muted)] py-6 text-center">
               Agrega recetas para ver tu rentabilidad
             </p>
           ) : (
@@ -210,26 +210,26 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
               {data.topProfitable.map((recipe, i) => (
                 <div
                   key={recipe.id}
-                  className="flex items-center justify-between py-2.5 px-2 -mx-2 rounded-lg hover:bg-zinc-50 transition-colors"
+                  className="flex items-center justify-between py-2.5 px-2 -mx-2 rounded-lg hover:bg-[var(--bg)] transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-[var(--success-light)] text-[var(--success)] flex items-center justify-center text-xs font-bold shrink-0">
                       {i + 1}
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-zinc-800">
+                      <div className="text-sm font-medium text-[var(--text)]">
                         {recipe.name}
                       </div>
-                      <div className="text-xs text-zinc-400">
+                      <div className="text-xs text-[var(--muted)]">
                         Venta: ${recipe.sellPrice} · Costo: ${recipe.foodCost}
                       </div>
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-3">
-                    <div className="text-sm font-bold text-emerald-600 tabular-nums">
+                    <div className="text-sm font-bold text-[var(--success)] tabular-nums">
                       {recipe.marginPercent}%
                     </div>
-                    <div className="text-xs text-zinc-400 tabular-nums">
+                    <div className="text-xs text-[var(--muted)] tabular-nums">
                       ${recipe.margin} margen
                     </div>
                   </div>
@@ -239,12 +239,12 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
           )}
         </div>
 
-        <div className="bg-white border border-zinc-100 rounded-2xl p-5">
-          <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-4">
+        <div className="bg-[var(--card)] border border-[var(--border-light)] shadow-sm rounded-2xl p-5">
+          <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide mb-4">
             Menor margen
           </h3>
           {data.bottomProfitable.length === 0 ? (
-            <p className="text-sm text-zinc-400 py-6 text-center">
+            <p className="text-sm text-[var(--muted)] py-6 text-center">
               Agrega recetas para ver tu rentabilidad
             </p>
           ) : (
@@ -252,23 +252,23 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
               {data.bottomProfitable.map((recipe, i) => (
                 <div
                   key={recipe.id}
-                  className="flex items-center justify-between py-2.5 px-2 -mx-2 rounded-lg hover:bg-zinc-50 transition-colors"
+                  className="flex items-center justify-between py-2.5 px-2 -mx-2 rounded-lg hover:bg-[var(--bg)] transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                         recipe.marginPercent < 50
-                          ? "bg-red-100 text-red-700"
-                          : "bg-amber-100 text-amber-700"
+                          ? "bg-[var(--danger-light)] text-[var(--danger)]"
+                          : "bg-[var(--warning-light)] text-[var(--warning)]"
                       }`}
                     >
                       {i + 1}
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-zinc-800">
+                      <div className="text-sm font-medium text-[var(--text)]">
                         {recipe.name}
                       </div>
-                      <div className="text-xs text-zinc-400">
+                      <div className="text-xs text-[var(--muted)]">
                         Venta: ${recipe.sellPrice} · Costo: ${recipe.foodCost}
                       </div>
                     </div>
@@ -279,7 +279,7 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
                     >
                       {recipe.foodCostPercent}%
                     </div>
-                    <div className="text-xs text-zinc-400">costo MP</div>
+                    <div className="text-xs text-[var(--muted)]">costo MP</div>
                   </div>
                 </div>
               ))}
@@ -290,8 +290,8 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
 
       {/* Price Alerts */}
       {data.priceAlerts.length > 0 && (
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5">
-          <h3 className="text-xs font-medium text-amber-800 uppercase tracking-wide mb-3">
+        <div className="bg-[var(--warning-light)] border border-[var(--warning)]/20 rounded-2xl p-5">
+          <h3 className="text-xs font-medium text-[var(--warning)] uppercase tracking-wide mb-3">
             Alertas de precio
           </h3>
           <div className="space-y-1">
@@ -301,13 +301,13 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
                 className="flex items-center justify-between py-2.5 text-sm"
               >
                 <div>
-                  <span className="font-medium text-zinc-800">
+                  <span className="font-medium text-[var(--text)]">
                     {alert.name}
                   </span>
-                  <span className="text-zinc-400"> ({alert.unit})</span>
+                  <span className="text-[var(--muted)]"> ({alert.unit})</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-zinc-400 tabular-nums">
+                  <span className="text-[var(--muted)] tabular-nums">
                     ${alert.previousPrice.toFixed(2)}
                   </span>
                   <svg
@@ -323,14 +323,14 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
                       d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
                     />
                   </svg>
-                  <span className="font-medium text-zinc-800 tabular-nums">
+                  <span className="font-medium text-[var(--text)] tabular-nums">
                     ${alert.currentPrice.toFixed(2)}
                   </span>
                   <span
                     className={`text-[11px] font-bold px-2 py-0.5 rounded-full tabular-nums ${
                       alert.changePercent > 0
-                        ? "bg-red-100 text-red-700"
-                        : "bg-emerald-100 text-emerald-700"
+                        ? "bg-[var(--danger-light)] text-[var(--danger)]"
+                        : "bg-[var(--success-light)] text-[var(--success)]"
                     }`}
                   >
                     {alert.changePercent > 0 ? "+" : ""}
@@ -345,8 +345,8 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
 
       {/* Supplier Breakdown */}
       {data.supplierBreakdown.length > 0 && (
-        <div className="bg-white border border-zinc-100 rounded-2xl p-5">
-          <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-4">
+        <div className="bg-[var(--card)] border border-[var(--border-light)] shadow-sm rounded-2xl p-5">
+          <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide mb-4">
             Gasto por proveedor (este mes)
           </h3>
           <div className="space-y-4">
@@ -359,18 +359,18 @@ export default function Dashboard({ restaurantId }: DashboardProps) {
                   className="space-y-1.5"
                 >
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-zinc-700">
+                    <span className="font-medium text-[var(--text)]">
                       {supplier.supplierName}
                     </span>
-                    <span className="text-zinc-400 tabular-nums">
+                    <span className="text-[var(--muted)] tabular-nums">
                       ${supplier.totalSpent.toLocaleString("es-MX")} ·{" "}
                       {supplier.invoiceCount} factura
                       {supplier.invoiceCount !== 1 ? "s" : ""}
                     </span>
                   </div>
-                  <div className="w-full bg-zinc-100 rounded-full h-1.5">
+                  <div className="w-full bg-[var(--border-light)] rounded-full h-1.5">
                     <div
-                      className="h-1.5 rounded-full bg-indigo-500 transition-all duration-500"
+                      className="h-1.5 rounded-full bg-[var(--primary)] transition-all duration-500"
                       style={{ width: `${barWidth}%` }}
                     />
                   </div>

@@ -12,7 +12,7 @@ interface InvoiceReviewProps {
 }
 
 const inputClass =
-  "w-full px-3 py-2 bg-zinc-50/50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-colors";
+  "w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring)] focus:border-[var(--primary)] transition-colors";
 
 export default function InvoiceReview({
   invoiceId,
@@ -116,10 +116,10 @@ export default function InvoiceReview({
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.9)
-      return "bg-emerald-50 text-emerald-700 border-emerald-200/80";
+      return "bg-[var(--success-light)] text-[var(--success)] border-[var(--success)]/20";
     if (confidence >= 0.7)
-      return "bg-amber-50 text-amber-700 border-amber-200/80";
-    return "bg-red-50 text-red-700 border-red-200/80";
+      return "bg-[var(--warning-light)] text-[var(--warning)] border-[var(--warning)]/20";
+    return "bg-[var(--danger-light)] text-[var(--danger)] border-[var(--danger)]/20";
   };
 
   return (
@@ -127,16 +127,16 @@ export default function InvoiceReview({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
+          <h2 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
             Revisar factura
           </h2>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Verifica los datos extraídos por la IA y corrige si es necesario
           </p>
         </div>
         <button
           onClick={onCancel}
-          className="text-sm text-zinc-500 hover:text-zinc-700 px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
+          className="text-sm text-[var(--muted)] hover:text-[var(--text)] px-3 py-1.5 rounded-lg hover:bg-[var(--border-light)] transition-colors"
         >
           Cancelar
         </button>
@@ -145,7 +145,7 @@ export default function InvoiceReview({
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Invoice image */}
-        <div className="bg-white rounded-2xl border border-zinc-100 p-4 flex items-center justify-center min-h-[400px]">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-4 flex items-center justify-center min-h-[400px]">
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -153,20 +153,20 @@ export default function InvoiceReview({
               className="max-w-full max-h-[600px] object-contain rounded-xl"
             />
           ) : (
-            <p className="text-zinc-400 text-sm">Vista previa no disponible</p>
+            <p className="text-[var(--muted)] text-sm">Vista previa no disponible</p>
           )}
         </div>
 
         {/* Right: Extracted data */}
         <div className="space-y-4">
           {/* Invoice header fields */}
-          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4">
-            <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-5 space-y-4">
+            <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide">
               Datos de la factura
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
+                <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
                   Proveedor
                 </label>
                 <input
@@ -178,7 +178,7 @@ export default function InvoiceReview({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
+                <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
                   No. Factura
                 </label>
                 <input
@@ -190,7 +190,7 @@ export default function InvoiceReview({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
+                <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
                   Fecha
                 </label>
                 <input
@@ -201,10 +201,10 @@ export default function InvoiceReview({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
+                <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
                   Total calculado
                 </label>
-                <div className="px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-semibold text-zinc-800">
+                <div className="px-3 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-xl text-sm font-semibold text-[var(--text)]">
                   $
                   {calculatedTotal.toLocaleString("es-MX", {
                     minimumFractionDigits: 2,
@@ -216,14 +216,14 @@ export default function InvoiceReview({
           </div>
 
           {/* Line items */}
-          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4">
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+              <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide">
                 Productos ({lineItems.length})
               </h3>
               <button
                 onClick={addLineItem}
-                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 transition-colors"
+                className="text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-hover)] px-2.5 py-1 rounded-lg hover:bg-[var(--primary-light)] transition-colors"
               >
                 + Agregar
               </button>
@@ -233,7 +233,7 @@ export default function InvoiceReview({
               {lineItems.map((item, index) => (
                 <div
                   key={index}
-                  className="border border-zinc-100 rounded-xl p-3.5 space-y-3 group hover:border-zinc-200 transition-colors"
+                  className="border border-[var(--border-light)] rounded-xl p-3.5 space-y-3 group hover:border-[var(--border)] transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <span
@@ -243,7 +243,7 @@ export default function InvoiceReview({
                     </span>
                     <button
                       onClick={() => removeLineItem(index)}
-                      className="opacity-0 group-hover:opacity-100 text-xs text-red-500 hover:text-red-700 transition-all"
+                      className="opacity-0 group-hover:opacity-100 text-xs text-[var(--danger)] hover:text-[var(--danger)] transition-all"
                     >
                       Eliminar
                     </button>
@@ -261,7 +261,7 @@ export default function InvoiceReview({
 
                   <div className="grid grid-cols-4 gap-2">
                     <div>
-                      <label className="block text-[11px] text-zinc-400 mb-1">
+                      <label className="block text-[11px] text-[var(--muted)] mb-1">
                         Cantidad
                       </label>
                       <input
@@ -279,7 +279,7 @@ export default function InvoiceReview({
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] text-zinc-400 mb-1">
+                      <label className="block text-[11px] text-[var(--muted)] mb-1">
                         Unidad
                       </label>
                       <select
@@ -299,7 +299,7 @@ export default function InvoiceReview({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[11px] text-zinc-400 mb-1">
+                      <label className="block text-[11px] text-[var(--muted)] mb-1">
                         $/unidad
                       </label>
                       <input
@@ -317,10 +317,10 @@ export default function InvoiceReview({
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] text-zinc-400 mb-1">
+                      <label className="block text-[11px] text-[var(--muted)] mb-1">
                         Total
                       </label>
-                      <div className="px-2 py-2 bg-zinc-50 border border-zinc-100 rounded-xl text-sm text-center font-medium text-zinc-700">
+                      <div className="px-2 py-2 bg-[var(--bg)] border border-[var(--border-light)] rounded-xl text-sm text-center font-medium text-[var(--text)]">
                         $
                         {item.totalPrice.toLocaleString("es-MX", {
                           minimumFractionDigits: 2,
@@ -336,13 +336,13 @@ export default function InvoiceReview({
       </div>
 
       {/* Action bar */}
-      <div className="flex items-center justify-between pt-5 border-t border-zinc-200">
-        <p className="text-sm text-zinc-500">
-          <span className="font-medium text-zinc-700">
+      <div className="flex items-center justify-between pt-5 border-t border-[var(--border)]">
+        <p className="text-sm text-[var(--muted)]">
+          <span className="font-medium text-[var(--text)]">
             {lineItems.length}
           </span>{" "}
           productos ·{" "}
-          <span className="font-medium text-zinc-700">
+          <span className="font-medium text-[var(--text)]">
             $
             {calculatedTotal.toLocaleString("es-MX", {
               minimumFractionDigits: 2,
@@ -354,14 +354,14 @@ export default function InvoiceReview({
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="px-5 py-2 text-sm font-medium text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors"
+            className="px-5 py-2 text-sm font-medium text-[var(--muted)] bg-[var(--border-light)] hover:bg-[var(--border)] rounded-xl transition-colors"
           >
             Descartar
           </button>
           <button
             onClick={handleConfirm}
             disabled={isConfirming || lineItems.length === 0}
-            className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 disabled:cursor-not-allowed rounded-xl transition-all"
+            className="px-5 py-2 text-sm font-medium text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-zinc-300 disabled:cursor-not-allowed rounded-xl transition-all"
           >
             {isConfirming ? "Guardando..." : "Confirmar factura"}
           </button>

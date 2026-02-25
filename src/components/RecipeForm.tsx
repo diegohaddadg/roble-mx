@@ -34,7 +34,7 @@ interface RecipeFormProps {
 }
 
 const inputClass =
-  "w-full px-3 py-2 bg-zinc-50/50 border border-zinc-200 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-colors";
+  "w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring)] focus:border-[var(--primary)] transition-colors";
 
 export default function RecipeForm({
   restaurantId,
@@ -82,9 +82,9 @@ export default function RecipeForm({
     sellPrice > 0 ? (costPerPortion / sellPrice) * 100 : 0;
 
   const getFoodCostColor = (pct: number) => {
-    if (pct <= 28) return "text-emerald-600";
-    if (pct <= 35) return "text-amber-600";
-    return "text-red-600";
+    if (pct <= 28) return "text-[var(--success)]";
+    if (pct <= 35) return "text-[var(--warning)]";
+    return "text-[var(--danger)]";
   };
 
   const addItem = () => {
@@ -211,16 +211,16 @@ export default function RecipeForm({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
+          <h2 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
             {editRecipe ? "Editar receta" : "Nueva receta"}
           </h2>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Agrega ingredientes y ve el costo en tiempo real
           </p>
         </div>
         <button
           onClick={onCancel}
-          className="text-sm text-zinc-500 hover:text-zinc-700 px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
+          className="text-sm text-[var(--muted)] hover:text-[var(--text)] px-3 py-1.5 rounded-lg hover:bg-[var(--border-light)] transition-colors"
         >
           Cancelar
         </button>
@@ -230,13 +230,13 @@ export default function RecipeForm({
         {/* Left: Form */}
         <div className="lg:col-span-2 space-y-4">
           {/* Recipe info */}
-          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4">
-            <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-5 space-y-4">
+            <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide">
               Información del platillo
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
+                <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
                   Nombre del platillo
                 </label>
                 <input
@@ -248,7 +248,7 @@ export default function RecipeForm({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
+                <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
                   Categoría
                 </label>
                 <input
@@ -260,7 +260,7 @@ export default function RecipeForm({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
+                <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
                   Precio de venta (MXN)
                 </label>
                 <input
@@ -275,7 +275,7 @@ export default function RecipeForm({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 mb-1.5">
+                <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
                   Porciones por receta
                 </label>
                 <input
@@ -292,14 +292,14 @@ export default function RecipeForm({
           </div>
 
           {/* Ingredients list */}
-          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4">
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+              <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide">
                 Ingredientes ({items.length})
               </h3>
               <button
                 onClick={addItem}
-                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 transition-colors"
+                className="text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-hover)] px-2.5 py-1 rounded-lg hover:bg-[var(--primary-light)] transition-colors"
               >
                 + Agregar
               </button>
@@ -307,9 +307,9 @@ export default function RecipeForm({
 
             {items.length === 0 ? (
               <div className="text-center py-10">
-                <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 bg-[var(--border-light)] rounded-2xl flex items-center justify-center mx-auto mb-3">
                   <svg
-                    className="w-6 h-6 text-zinc-400"
+                    className="w-6 h-6 text-[var(--muted)]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -322,12 +322,12 @@ export default function RecipeForm({
                     />
                   </svg>
                 </div>
-                <p className="text-sm text-zinc-500 mb-1">
+                <p className="text-sm text-[var(--muted)] mb-1">
                   Agrega ingredientes para calcular el costo
                 </p>
                 <button
                   onClick={addItem}
-                  className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium"
                 >
                   Agregar primer ingrediente
                 </button>
@@ -337,7 +337,7 @@ export default function RecipeForm({
                 {items.map((item, index) => (
                   <div
                     key={index}
-                    className="border border-zinc-100 rounded-xl p-3 group hover:border-zinc-200 transition-colors"
+                    className="border border-[var(--border-light)] rounded-xl p-3 group hover:border-[var(--border)] transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <div className="flex-1">
@@ -380,17 +380,17 @@ export default function RecipeForm({
                         />
                       </div>
 
-                      <div className="w-12 text-center text-xs text-zinc-400">
+                      <div className="w-12 text-center text-xs text-[var(--muted)]">
                         {item.unit}
                       </div>
 
-                      <div className="w-20 text-right text-sm font-medium text-zinc-700 tabular-nums">
+                      <div className="w-20 text-right text-sm font-medium text-[var(--text)] tabular-nums">
                         ${item.itemCost.toFixed(2)}
                       </div>
 
                       <button
                         onClick={() => removeItem(index)}
-                        className="opacity-0 group-hover:opacity-100 text-zinc-300 hover:text-red-500 transition-all p-1"
+                        className="opacity-0 group-hover:opacity-100 text-zinc-300 hover:text-[var(--danger)] transition-all p-1"
                       >
                         <svg
                           className="w-4 h-4"
@@ -416,8 +416,8 @@ export default function RecipeForm({
 
         {/* Right: Live cost calculator */}
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-5 sticky top-20">
-            <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-5 space-y-5 sticky top-20">
+            <h3 className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide">
               Análisis de costo
             </h3>
 
@@ -428,58 +428,58 @@ export default function RecipeForm({
               >
                 {foodCostPercent.toFixed(1)}%
               </div>
-              <div className="text-xs text-zinc-400 mt-1">
+              <div className="text-xs text-[var(--muted)] mt-1">
                 Costo de materia prima
               </div>
-              <div className="mt-3 w-full bg-zinc-100 rounded-full h-2">
+              <div className="mt-3 w-full bg-[var(--border-light)] rounded-full h-2">
                 <div
                   className={`h-2 rounded-full transition-all duration-300 ${
                     foodCostPercent <= 28
-                      ? "bg-emerald-500"
+                      ? "bg-[var(--success)]"
                       : foodCostPercent <= 35
-                        ? "bg-amber-500"
-                        : "bg-red-500"
+                        ? "bg-[var(--warning)]"
+                        : "bg-[var(--danger)]"
                   }`}
                   style={{ width: `${Math.min(foodCostPercent, 100)}%` }}
                 />
               </div>
               <div className="flex justify-between text-[10px] text-zinc-300 mt-1 px-0.5">
                 <span>0%</span>
-                <span className="text-emerald-400">28%</span>
-                <span className="text-amber-400">35%</span>
+                <span className="text-[var(--success)]">28%</span>
+                <span className="text-[var(--warning)]">35%</span>
                 <span>50%+</span>
               </div>
             </div>
 
             {/* Breakdown */}
-            <div className="space-y-0 text-sm divide-y divide-zinc-100">
+            <div className="space-y-0 text-sm divide-y divide-[var(--border-light)]">
               <div className="flex justify-between items-center py-2.5">
-                <span className="text-zinc-500">Precio de venta</span>
-                <span className="font-semibold text-zinc-800 tabular-nums">
+                <span className="text-[var(--muted)]">Precio de venta</span>
+                <span className="font-semibold text-[var(--text)] tabular-nums">
                   ${sellPrice.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2.5">
-                <span className="text-zinc-500">Costo total receta</span>
-                <span className="font-medium text-zinc-700 tabular-nums">
+                <span className="text-[var(--muted)]">Costo total receta</span>
+                <span className="font-medium text-[var(--text)] tabular-nums">
                   ${totalFoodCost.toFixed(2)}
                 </span>
               </div>
               {recipeYield > 1 && (
                 <div className="flex justify-between items-center py-2.5">
-                  <span className="text-zinc-500">
+                  <span className="text-[var(--muted)]">
                     Costo por porción (÷{recipeYield})
                   </span>
-                  <span className="font-medium text-zinc-700 tabular-nums">
+                  <span className="font-medium text-[var(--text)] tabular-nums">
                     ${costPerPortion.toFixed(2)}
                   </span>
                 </div>
               )}
               <div className="flex justify-between items-center py-2.5">
-                <span className="text-zinc-500">Margen bruto</span>
+                <span className="text-[var(--muted)]">Margen bruto</span>
                 <span
                   className={`font-bold text-lg tabular-nums ${
-                    margin >= 0 ? "text-emerald-600" : "text-red-600"
+                    margin >= 0 ? "text-[var(--success)]" : "text-[var(--danger)]"
                   }`}
                 >
                   ${margin.toFixed(2)}{" "}
@@ -494,10 +494,10 @@ export default function RecipeForm({
             <div
               className={`rounded-xl p-3 text-xs leading-relaxed ${
                 foodCostPercent <= 28
-                  ? "bg-emerald-50 text-emerald-700"
+                  ? "bg-[var(--success-light)] text-[var(--success)]"
                   : foodCostPercent <= 35
-                    ? "bg-amber-50 text-amber-700"
-                    : "bg-red-50 text-red-700"
+                    ? "bg-[var(--warning-light)] text-[var(--warning)]"
+                    : "bg-[var(--danger-light)] text-[var(--danger)]"
               }`}
             >
               {foodCostPercent <= 28
@@ -510,9 +510,9 @@ export default function RecipeForm({
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200/80 rounded-xl">
+            <div className="flex items-center gap-2 px-4 py-3 bg-[var(--danger-light)] border border-[var(--danger)]/20 rounded-xl">
               <svg
-                className="w-4 h-4 text-red-500 shrink-0"
+                className="w-4 h-4 text-[var(--danger)] shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -524,7 +524,7 @@ export default function RecipeForm({
                   d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
                 />
               </svg>
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-sm text-[var(--danger)]">{error}</p>
             </div>
           )}
 
@@ -532,7 +532,7 @@ export default function RecipeForm({
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 rounded-xl transition-all active:scale-[0.98]"
+            className="w-full py-2.5 text-sm font-medium text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-zinc-300 rounded-xl transition-all active:scale-[0.98]"
           >
             {isSaving
               ? "Guardando..."

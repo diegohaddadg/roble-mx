@@ -10,9 +10,9 @@ export default function Error({
   return (
     <div className="flex items-center justify-center py-20">
       <div className="text-center max-w-sm">
-        <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-12 h-12 bg-[var(--danger-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
           <svg
-            className="w-6 h-6 text-red-500"
+            className="w-6 h-6 text-[var(--danger)]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -25,15 +25,15 @@ export default function Error({
             />
           </svg>
         </div>
-        <h2 className="text-lg font-bold text-zinc-900 mb-1">
+        <h2 className="text-lg font-bold text-[var(--text)] mb-1">
           Algo salió mal
         </h2>
-        <p className="text-sm text-zinc-500 mb-6">
+        <p className="text-sm text-[var(--muted)] mb-6">
           {error.message || "Ocurrió un error inesperado"}
         </p>
         <button
           onClick={reset}
-          className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors"
+          className="px-5 py-2 text-sm font-medium text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] rounded-xl transition-colors"
         >
           Intentar de nuevo
         </button>

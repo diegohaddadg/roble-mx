@@ -1,8 +1,29 @@
 @import "tailwindcss";
 
+:root {
+  --bg: #F7F6F2;
+  --card: #FFFFFF;
+  --text: #1E1E1E;
+  --primary: #0F2E2A;
+  --primary-hover: #0A201D;
+  --primary-light: #E8EFED;
+  --primary-ring: rgba(15, 46, 42, 0.25);
+  --accent: #8B5E3C;
+  --accent-light: #F5EDE6;
+  --success: #2E7D5B;
+  --success-light: #E9F5EF;
+  --warning: #C48A2A;
+  --warning-light: #FDF4E4;
+  --danger: #B04A3A;
+  --danger-light: #FBEAE8;
+  --border: #E8E6E1;
+  --border-light: #F0EEEA;
+  --muted: #6B6B6B;
+}
+
 ::selection {
-  background-color: #c7d2fe;
-  color: #312e81;
+  background-color: var(--primary-light);
+  color: var(--primary);
 }
 
 input[type="number"]::-webkit-inner-spin-button,

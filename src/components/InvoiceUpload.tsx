@@ -84,8 +84,8 @@ export default function InvoiceUpload({
           transition-all duration-200 cursor-pointer
           ${
             isDragging
-              ? "border-indigo-400 bg-indigo-50/80 scale-[1.01]"
-              : "border-zinc-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/30"
+              ? "border-[var(--primary)] bg-[var(--primary-light)] scale-[1.01]"
+              : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] hover:bg-[var(--accent-light)]/30"
           }
           ${isUploading ? "opacity-60 pointer-events-none" : ""}
         `}
@@ -93,12 +93,12 @@ export default function InvoiceUpload({
         <div
           className={`
             w-14 h-14 rounded-2xl flex items-center justify-center transition-colors duration-200
-            ${isDragging ? "bg-indigo-100" : "bg-zinc-100 group-hover:bg-indigo-100"}
+            ${isDragging ? "bg-[var(--primary-light)]" : "bg-[var(--border-light)] group-hover:bg-[var(--accent-light)]"}
           `}
         >
           {isUploading ? (
             <svg
-              className="w-6 h-6 text-indigo-600 animate-spin"
+              className="w-6 h-6 text-[var(--primary)] animate-spin"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -120,8 +120,8 @@ export default function InvoiceUpload({
             <svg
               className={`w-6 h-6 transition-colors duration-200 ${
                 isDragging
-                  ? "text-indigo-600"
-                  : "text-zinc-400 group-hover:text-indigo-600"
+                  ? "text-[var(--primary)]"
+                  : "text-zinc-400 group-hover:text-[var(--accent)]"
               }`}
               fill="none"
               stroke="currentColor"
@@ -139,19 +139,19 @@ export default function InvoiceUpload({
 
         {isUploading ? (
           <div className="text-center">
-            <p className="text-sm font-medium text-zinc-700">
+            <p className="text-sm font-medium text-[var(--text)]">
               Procesando factura...
             </p>
-            <p className="text-xs text-zinc-400 mt-1">
+            <p className="text-xs text-[var(--muted)] mt-1">
               La IA está extrayendo los datos
             </p>
           </div>
         ) : (
           <div className="text-center">
-            <p className="text-sm font-medium text-zinc-700">
+            <p className="text-sm font-medium text-[var(--text)]">
               Sube una factura de proveedor
             </p>
-            <p className="text-xs text-zinc-400 mt-1">
+            <p className="text-xs text-[var(--muted)] mt-1">
               Arrastra una imagen o PDF, o haz clic para seleccionar
             </p>
             <p className="text-[11px] text-zinc-300 mt-2">
@@ -171,9 +171,9 @@ export default function InvoiceUpload({
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200/80 rounded-xl">
+        <div className="flex items-center gap-2 px-4 py-3 bg-[var(--danger-light)] border border-[var(--danger)]/20 rounded-xl">
           <svg
-            className="w-4 h-4 text-red-500 shrink-0"
+            className="w-4 h-4 text-[var(--danger)] shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -185,7 +185,7 @@ export default function InvoiceUpload({
               d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
             />
           </svg>
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-[var(--danger)]">{error}</p>
         </div>
       )}
     </div>

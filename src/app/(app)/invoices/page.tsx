@@ -57,10 +57,10 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
+        <h2 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
           Historial de facturas
         </h2>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="text-sm text-[var(--muted)] mt-1">
           Facturas confirmadas y guardadas en el sistema
         </p>
       </div>
@@ -70,15 +70,15 @@ export default function InvoicesPage() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-14 bg-white rounded-xl border border-zinc-100"
+              className="h-14 bg-[var(--card)] rounded-xl border border-[var(--border-light)]"
             />
           ))}
         </div>
       ) : invoices.length === 0 ? (
         <div className="text-center py-20">
-          <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 bg-[var(--border-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-7 h-7 text-zinc-400"
+              className="w-7 h-7 text-[var(--muted)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -91,22 +91,22 @@ export default function InvoicesPage() {
               />
             </svg>
           </div>
-          <h3 className="font-semibold text-zinc-700 mb-1">
+          <h3 className="font-semibold text-[var(--text)] mb-1">
             No tienes facturas confirmadas
           </h3>
-          <p className="text-sm text-zinc-500 mb-5">
+          <p className="text-sm text-[var(--muted)] mb-5">
             Escanea tu primera factura para comenzar a rastrear costos
           </p>
           <Link
             href="/scanner"
-            className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium"
           >
             Escanea tu primera factura →
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
-          <div className="grid grid-cols-12 gap-2 px-5 py-3 bg-zinc-50/80 text-[11px] font-medium text-zinc-400 uppercase tracking-wider border-b border-zinc-100">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm overflow-hidden">
+          <div className="grid grid-cols-12 gap-2 px-5 py-3 bg-[var(--bg)] text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider border-b border-[var(--border-light)]">
             <div className="col-span-2">Fecha</div>
             <div className="col-span-3">Proveedor</div>
             <div className="col-span-2">No. Factura</div>
@@ -118,30 +118,30 @@ export default function InvoicesPage() {
             <Link
               key={inv.id}
               href={`/invoices/${inv.id}`}
-              className="grid grid-cols-12 gap-2 px-5 py-3.5 border-b border-zinc-50 last:border-0 hover:bg-zinc-50/50 transition-colors group"
+              className="grid grid-cols-12 gap-2 px-5 py-3.5 border-b border-[var(--border-light)] last:border-0 hover:bg-[var(--bg)]/50 transition-colors group"
             >
-              <div className="col-span-2 text-sm text-zinc-600">
+              <div className="col-span-2 text-sm text-[var(--muted)]">
                 {formatDate(inv.invoiceDate ?? inv.createdAt)}
               </div>
               <div className="col-span-3">
-                <div className="text-sm font-medium text-zinc-800 truncate">
+                <div className="text-sm font-medium text-[var(--text)] truncate">
                   {inv.supplier?.name ?? "Sin proveedor"}
                 </div>
               </div>
-              <div className="col-span-2 text-sm text-zinc-500 truncate">
+              <div className="col-span-2 text-sm text-[var(--muted)] truncate">
                 {inv.invoiceNumber ?? "—"}
               </div>
-              <div className="col-span-2 text-right text-sm font-medium text-zinc-800 tabular-nums">
+              <div className="col-span-2 text-right text-sm font-medium text-[var(--text)] tabular-nums">
                 {inv.total
                   ? `$${Number(inv.total).toLocaleString("es-MX", { minimumFractionDigits: 2 })}`
                   : "—"}
               </div>
-              <div className="col-span-2 text-right text-sm text-zinc-500 tabular-nums">
+              <div className="col-span-2 text-right text-sm text-[var(--muted)] tabular-nums">
                 {inv._count.lineItems}
               </div>
               <div className="col-span-1 flex items-center justify-end">
                 <svg
-                  className="w-4 h-4 text-zinc-300 group-hover:text-zinc-500 transition-colors"
+                  className="w-4 h-4 text-zinc-300 group-hover:text-[var(--muted)] transition-colors"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
