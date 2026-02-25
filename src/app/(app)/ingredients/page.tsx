@@ -13,6 +13,13 @@ interface IngredientRow {
   previousPrice: number | null;
   changePercent: number;
   recipesCount: number;
+  preferredSupplierId: string | null;
+  preferredSupplierName: string | null;
+}
+
+interface SupplierOption {
+  id: string;
+  name: string;
 }
 
 const CATEGORIES = [
@@ -34,6 +41,7 @@ const inputClass =
 export default function IngredientsPage() {
   const { restaurantId } = useRestaurant();
   const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
+  const [suppliers, setSuppliers] = useState<SupplierOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Todas");
@@ -44,11 +52,14 @@ export default function IngredientsPage() {
     if (!restaurantId) return;
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `/api/ingredients?restaurantId=${restaurantId}`
-      );
-      const data = await res.json();
-      setIngredients(Array.isArray(data) ? data : []);
+      const [ingRes, supRes] = await Promise.all([
+        fetch(`/api/ingredients?restaurantId=${restaurantId}`),
+        fetch(`/api/suppliers?restaurantId=${restaurantId}`),
+      ]);
+      const ingData = await ingRes.json();
+      const supData = await supRes.json();
+      setIngredients(Array.isArray(ingData) ? ingData : []);
+      setSuppliers(Array.isArray(supData) ? supData : []);
     } catch (err) {
       console.error("Load ingredients error:", err);
     } finally {
@@ -59,6 +70,40 @@ export default function IngredientsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleSupplierChange = async (
+    ingredientId: string,
+    supplierId: string | null
+  ) => {
+    if (!restaurantId) return;
+    setIngredients((prev) =>
+      prev.map((i) =>
+        i.id === ingredientId
+          ? {
+              ...i,
+              preferredSupplierId: supplierId,
+              preferredSupplierName:
+                suppliers.find((s) => s.id === supplierId)?.name ?? null,
+            }
+          : i
+      )
+    );
+    try {
+      await fetch(
+        `/api/ingredients/${ingredientId}/preferred-supplier?restaurantId=${restaurantId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            preferredSupplierId: supplierId || null,
+          }),
+        }
+      );
+    } catch (err) {
+      console.error("Update supplier error:", err);
+      await load();
+    }
+  };
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -71,16 +116,13 @@ export default function IngredientsPage() {
 
   const filtered = useMemo(() => {
     let list = ingredients;
-
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((i) => i.name.toLowerCase().includes(q));
     }
-
     if (category !== "Todas") {
       list = list.filter((i) => i.category === category);
     }
-
     list = [...list].sort((a, b) => {
       let cmp = 0;
       switch (sortKey) {
@@ -99,7 +141,6 @@ export default function IngredientsPage() {
       }
       return sortDir === "asc" ? cmp : -cmp;
     });
-
     return list;
   }, [ingredients, search, category, sortKey, sortDir]);
 
@@ -134,12 +175,10 @@ export default function IngredientsPage() {
           Ingredientes
         </h2>
         <p className="text-sm text-[var(--muted)] mt-1">
-          Todos los insumos de tu restaurante, sus precios y recetas
-          vinculadas
+          Todos los insumos de tu restaurante, sus precios y recetas vinculadas
         </p>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <input
           type="text"
@@ -208,10 +247,14 @@ export default function IngredientsPage() {
         </div>
       ) : (
         <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm overflow-hidden">
-          {/* Header */}
           <div className="grid grid-cols-12 gap-2 px-5 py-3 bg-[var(--bg)] border-b border-[var(--border-light)]">
-            <div className="col-span-3">
+            <div className="col-span-2">
               <SortHeader label="Nombre" field="name" />
+            </div>
+            <div className="col-span-2">
+              <span className="text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
+                Proveedor
+              </span>
             </div>
             <div className="col-span-2">
               <span className="text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
@@ -230,7 +273,7 @@ export default function IngredientsPage() {
                 className="justify-end"
               />
             </div>
-            <div className="col-span-2 text-right">
+            <div className="col-span-1 text-right">
               <SortHeader
                 label="Cambio"
                 field="changePercent"
@@ -246,15 +289,32 @@ export default function IngredientsPage() {
             </div>
           </div>
 
-          {/* Rows */}
           {filtered.map((ing) => (
-            <Link
+            <div
               key={ing.id}
-              href={`/ingredients/${ing.id}`}
-              className="grid grid-cols-12 gap-2 px-5 py-3.5 border-b border-[var(--border-light)] last:border-0 hover:bg-[var(--bg)]/50 transition-colors group"
+              className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-[var(--border-light)] last:border-0 hover:bg-[var(--bg)]/50 transition-colors items-center"
             >
-              <div className="col-span-3 text-sm font-medium text-[var(--text)] truncate">
+              <Link
+                href={`/ingredients/${ing.id}`}
+                className="col-span-2 text-sm font-medium text-[var(--text)] truncate hover:text-[var(--primary)] transition-colors"
+              >
                 {ing.name}
+              </Link>
+              <div className="col-span-2" onClick={(e) => e.stopPropagation()}>
+                <select
+                  value={ing.preferredSupplierId ?? ""}
+                  onChange={(e) =>
+                    handleSupplierChange(ing.id, e.target.value || null)
+                  }
+                  className="w-full px-2 py-1 bg-transparent border border-transparent hover:border-[var(--border)] rounded-lg text-xs text-[var(--muted)] focus:outline-none focus:ring-1 focus:ring-[var(--primary-ring)] transition-colors cursor-pointer truncate"
+                >
+                  <option value="">—</option>
+                  {suppliers.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="col-span-2 text-sm text-[var(--muted)] truncate">
                 {ing.category ?? "—"}
@@ -267,29 +327,43 @@ export default function IngredientsPage() {
                   ? `$${ing.currentPrice.toFixed(2)}`
                   : "—"}
               </div>
-              <div className="col-span-2 text-right">
+              <div className="col-span-1 text-right">
                 {ing.previousPrice !== null && ing.changePercent !== 0 ? (
                   <span
-                    className={`text-sm font-medium tabular-nums ${
+                    className={`text-xs font-medium tabular-nums ${
                       ing.changePercent > 0
                         ? "text-[var(--danger)]"
                         : "text-[var(--success)]"
                     }`}
                   >
-                    {ing.changePercent > 0 ? "↑" : "↓"}{" "}
+                    {ing.changePercent > 0 ? "↑" : "↓"}
                     {ing.changePercent > 0 ? "+" : ""}
                     {ing.changePercent}%
                   </span>
                 ) : (
-                  <span className="text-sm text-zinc-300">—</span>
+                  <span className="text-xs text-zinc-300">—</span>
                 )}
               </div>
               <div className="col-span-2 text-right text-sm text-[var(--muted)] tabular-nums">
                 {ing.recipesCount}
               </div>
-            </Link>
+            </div>
           ))}
         </div>
+      )}
+
+      {suppliers.length === 0 && ingredients.length > 0 && (
+        <p className="text-xs text-[var(--muted)] text-center">
+          Los proveedores se crean automáticamente al confirmar facturas, o
+          puedes{" "}
+          <Link
+            href="/suppliers"
+            className="text-[var(--primary)] hover:underline"
+          >
+            crear uno manualmente
+          </Link>
+          .
+        </p>
       )}
 
       <p className="text-xs text-[var(--muted)] text-center">

@@ -20,6 +20,9 @@ export async function GET(request: NextRequest) {
           orderBy: { createdAt: "desc" },
           take: 2,
         },
+        preferredSupplier: {
+          select: { id: true, name: true },
+        },
         _count: {
           select: { recipeItems: true },
         },
@@ -48,6 +51,8 @@ export async function GET(request: NextRequest) {
         previousPrice,
         changePercent,
         recipesCount: ing._count.recipeItems,
+        preferredSupplierId: ing.preferredSupplierId,
+        preferredSupplierName: ing.preferredSupplier?.name ?? null,
         createdAt: ing.createdAt,
       };
     });

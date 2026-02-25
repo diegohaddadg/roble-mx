@@ -74,58 +74,58 @@ async function main() {
   ]);
   console.log(`✅ 4 suppliers created`);
 
-  // ─── INGREDIENTS ─────────────────────────────────────────
+  // ─── INGREDIENTS (with preferred suppliers) ─────────────
   const ing = {
     pollo: await prisma.ingredient.create({
-      data: { name: "Pechuga de pollo s/h", category: "Proteínas", unit: "kg", currentPrice: 89.0, restaurantId: restaurant.id },
+      data: { name: "Pechuga de pollo s/h", category: "Proteínas", unit: "kg", currentPrice: 89.0, restaurantId: restaurant.id, preferredSupplierId: carnes.id },
     }),
     arrachera: await prisma.ingredient.create({
-      data: { name: "Arrachera de res", category: "Proteínas", unit: "kg", currentPrice: 189.0, restaurantId: restaurant.id },
+      data: { name: "Arrachera de res", category: "Proteínas", unit: "kg", currentPrice: 189.0, restaurantId: restaurant.id, preferredSupplierId: carnes.id },
     }),
     cerdo: await prisma.ingredient.create({
-      data: { name: "Lomo de cerdo", category: "Proteínas", unit: "kg", currentPrice: 95.0, restaurantId: restaurant.id },
+      data: { name: "Lomo de cerdo", category: "Proteínas", unit: "kg", currentPrice: 95.0, restaurantId: restaurant.id, preferredSupplierId: carnes.id },
     }),
     camaron: await prisma.ingredient.create({
-      data: { name: "Camarón U-15", category: "Proteínas", unit: "kg", currentPrice: 280.0, restaurantId: restaurant.id },
+      data: { name: "Camarón U-15", category: "Proteínas", unit: "kg", currentPrice: 280.0, restaurantId: restaurant.id, preferredSupplierId: carnes.id },
     }),
     tortillaMaiz: await prisma.ingredient.create({
-      data: { name: "Tortilla de maíz", category: "Básicos", unit: "kg", currentPrice: 22.0, restaurantId: restaurant.id },
+      data: { name: "Tortilla de maíz", category: "Básicos", unit: "kg", currentPrice: 22.0, restaurantId: restaurant.id, preferredSupplierId: abarrotes.id },
     }),
     tortillaHarina: await prisma.ingredient.create({
-      data: { name: "Tortilla de harina", category: "Básicos", unit: "kg", currentPrice: 35.0, restaurantId: restaurant.id },
+      data: { name: "Tortilla de harina", category: "Básicos", unit: "kg", currentPrice: 35.0, restaurantId: restaurant.id, preferredSupplierId: abarrotes.id },
     }),
     arroz: await prisma.ingredient.create({
-      data: { name: "Arroz grano largo", category: "Básicos", unit: "kg", currentPrice: 28.0, restaurantId: restaurant.id },
+      data: { name: "Arroz grano largo", category: "Básicos", unit: "kg", currentPrice: 28.0, restaurantId: restaurant.id, preferredSupplierId: abarrotes.id },
     }),
     tomate: await prisma.ingredient.create({
-      data: { name: "Tomate saladette", category: "Verduras", unit: "kg", currentPrice: 18.5, restaurantId: restaurant.id },
+      data: { name: "Tomate saladette", category: "Verduras", unit: "kg", currentPrice: 18.5, restaurantId: restaurant.id, preferredSupplierId: verduras.id },
     }),
     cebolla: await prisma.ingredient.create({
-      data: { name: "Cebolla blanca", category: "Verduras", unit: "kg", currentPrice: 15.0, restaurantId: restaurant.id },
+      data: { name: "Cebolla blanca", category: "Verduras", unit: "kg", currentPrice: 15.0, restaurantId: restaurant.id, preferredSupplierId: verduras.id },
     }),
     aguacate: await prisma.ingredient.create({
-      data: { name: "Aguacate Hass", category: "Verduras", unit: "kg", currentPrice: 65.0, restaurantId: restaurant.id },
+      data: { name: "Aguacate Hass", category: "Verduras", unit: "kg", currentPrice: 65.0, restaurantId: restaurant.id, preferredSupplierId: verduras.id },
     }),
     limon: await prisma.ingredient.create({
-      data: { name: "Limón sin semilla", category: "Verduras", unit: "kg", currentPrice: 25.0, restaurantId: restaurant.id },
+      data: { name: "Limón sin semilla", category: "Verduras", unit: "kg", currentPrice: 25.0, restaurantId: restaurant.id, preferredSupplierId: verduras.id },
     }),
     chile: await prisma.ingredient.create({
-      data: { name: "Chile serrano", category: "Verduras", unit: "kg", currentPrice: 30.0, restaurantId: restaurant.id },
+      data: { name: "Chile serrano", category: "Verduras", unit: "kg", currentPrice: 30.0, restaurantId: restaurant.id, preferredSupplierId: verduras.id },
     }),
     cilantro: await prisma.ingredient.create({
-      data: { name: "Cilantro", category: "Verduras", unit: "manojo", currentPrice: 5.0, restaurantId: restaurant.id },
+      data: { name: "Cilantro", category: "Verduras", unit: "manojo", currentPrice: 5.0, restaurantId: restaurant.id, preferredSupplierId: verduras.id },
     }),
     quesoOaxaca: await prisma.ingredient.create({
-      data: { name: "Queso Oaxaca", category: "Lácteos", unit: "kg", currentPrice: 120.0, restaurantId: restaurant.id },
+      data: { name: "Queso Oaxaca", category: "Lácteos", unit: "kg", currentPrice: 120.0, restaurantId: restaurant.id, preferredSupplierId: lacteos.id },
     }),
     crema: await prisma.ingredient.create({
-      data: { name: "Crema ácida", category: "Lácteos", unit: "L", currentPrice: 55.0, restaurantId: restaurant.id },
+      data: { name: "Crema ácida", category: "Lácteos", unit: "L", currentPrice: 55.0, restaurantId: restaurant.id, preferredSupplierId: lacteos.id },
     }),
     aceite: await prisma.ingredient.create({
-      data: { name: "Aceite vegetal", category: "Abarrotes", unit: "L", currentPrice: 38.0, restaurantId: restaurant.id },
+      data: { name: "Aceite vegetal", category: "Abarrotes", unit: "L", currentPrice: 38.0, restaurantId: restaurant.id, preferredSupplierId: abarrotes.id },
     }),
     frijol: await prisma.ingredient.create({
-      data: { name: "Frijol negro", category: "Básicos", unit: "kg", currentPrice: 32.0, restaurantId: restaurant.id },
+      data: { name: "Frijol negro", category: "Básicos", unit: "kg", currentPrice: 32.0, restaurantId: restaurant.id, preferredSupplierId: abarrotes.id },
     }),
     pina: await prisma.ingredient.create({
       data: { name: "Piña miel", category: "Frutas", unit: "pza", currentPrice: 35.0, restaurantId: restaurant.id },

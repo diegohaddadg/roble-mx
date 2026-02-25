@@ -46,8 +46,9 @@ model Supplier {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  invoices   Invoice[]
+  restaurant           Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  invoices             Invoice[]
+  preferredIngredients Ingredient[] @relation("PreferredSupplier")
 
   @@index([restaurantId])
   @@map("suppliers")
@@ -55,16 +56,18 @@ model Supplier {
 
 // ─── INGREDIENT ────────────────────────────────────────────
 model Ingredient {
-  id           String   @id @default(cuid())
-  name         String
-  category     String?
-  unit         String
-  currentPrice Decimal? @db.Decimal(10, 2) // ← FIXED: Decimal instead of Float
-  restaurantId String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  name                String
+  category            String?
+  unit                String
+  currentPrice        Decimal? @db.Decimal(10, 2)
+  preferredSupplierId String?
+  restaurantId        String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   restaurant         Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  preferredSupplier  Supplier?           @relation("PreferredSupplier", fields: [preferredSupplierId], references: [id], onDelete: SetNull)
   lineItems          LineItem[]
   priceHistory       PriceHistory[]
   recipeItems        RecipeItem[]
@@ -74,6 +77,7 @@ model Ingredient {
   @@unique([name, restaurantId])
   @@index([restaurantId])
   @@index([category])
+  @@index([preferredSupplierId])
   @@map("ingredients")
 }
 

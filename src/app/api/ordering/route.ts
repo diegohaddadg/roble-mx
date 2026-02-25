@@ -17,13 +17,17 @@ export async function GET(request: NextRequest) {
 
     const ingredients = await prisma.ingredient.findMany({
       where: { restaurantId },
-      include: { inventoryLevel: true },
+      include: {
+        inventoryLevel: true,
+        preferredSupplier: {
+          select: { id: true, name: true, phone: true },
+        },
+      },
     });
 
     const twentyEightDaysAgo = new Date();
     twentyEightDaysAgo.setDate(twentyEightDaysAgo.getDate() - 28);
 
-    // Aggregate line item quantities per ingredient over last 28 days
     const usageData = await prisma.lineItem.groupBy({
       by: ["ingredientId"],
       where: {
@@ -77,13 +81,14 @@ export async function GET(request: NextRequest) {
         onHand,
         suggestedQty,
         reason,
-        estimatedCost:
-          Math.round(suggestedQty * currentPrice * 100) / 100,
+        estimatedCost: Math.round(suggestedQty * currentPrice * 100) / 100,
         currentPrice,
+        supplierId: ing.preferredSupplier?.id ?? null,
+        supplierName: ing.preferredSupplier?.name ?? null,
+        supplierPhone: ing.preferredSupplier?.phone ?? null,
       });
     }
 
-    // Sort critical first, then low stock, then by estimated cost desc
     const priorityOrder: Record<string, number> = {
       Crítico: 0,
       "Bajo stock": 1,
@@ -105,8 +110,7 @@ export async function GET(request: NextRequest) {
       suggestions,
       summary: {
         totalItems: suggestions.length,
-        totalEstimatedCost:
-          Math.round(totalEstimatedCost * 100) / 100,
+        totalEstimatedCost: Math.round(totalEstimatedCost * 100) / 100,
       },
     });
   } catch (error) {

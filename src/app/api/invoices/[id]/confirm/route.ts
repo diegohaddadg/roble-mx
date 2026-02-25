@@ -93,11 +93,20 @@ export async function POST(
           }
         }
 
-        // Update ingredient current price
+        // Update ingredient current price + auto-assign preferred supplier
         if (ingredientId) {
+          const existingIngredient = await tx.ingredient.findUnique({
+            where: { id: ingredientId },
+            select: { preferredSupplierId: true },
+          });
           await tx.ingredient.update({
             where: { id: ingredientId },
-            data: { currentPrice: item.unitPrice },
+            data: {
+              currentPrice: item.unitPrice,
+              ...(supplierId && !existingIngredient?.preferredSupplierId
+                ? { preferredSupplierId: supplierId }
+                : {}),
+            },
           });
 
           // Create price history record

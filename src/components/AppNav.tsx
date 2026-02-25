@@ -9,6 +9,8 @@ const navItems = [
   { href: "/invoices", label: "Historial" },
   { href: "/ingredients", label: "Ingredientes" },
   { href: "/inventory", label: "Inventario" },
+  { href: "/ordering", label: "Qué pedir" },
+  { href: "/suppliers", label: "Proveedores" },
   { href: "/recipes", label: "Recetas" },
   { href: "/dashboard", label: "Dashboard" },
 ] as const;
