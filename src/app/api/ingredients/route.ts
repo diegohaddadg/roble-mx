@@ -1,6 +1,3 @@
-// app/api/ingredients/route.ts
-// List all ingredients for a restaurant (used in the review UI dropdown)
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -20,14 +17,42 @@ export async function GET(request: NextRequest) {
       where: { restaurantId },
       include: {
         priceHistory: {
-          orderBy: { date: "desc" },
-          take: 5,
+          orderBy: { createdAt: "desc" },
+          take: 2,
+        },
+        _count: {
+          select: { recipeItems: true },
         },
       },
       orderBy: { name: "asc" },
     });
 
-    return NextResponse.json(ingredients);
+    const result = ingredients.map((ing) => {
+      const currentPrice = ing.currentPrice ? Number(ing.currentPrice) : null;
+      const prev = ing.priceHistory[1];
+      const previousPrice = prev ? Number(prev.price) : null;
+
+      let changePercent = 0;
+      if (previousPrice !== null && currentPrice !== null && previousPrice > 0) {
+        changePercent =
+          Math.round(((currentPrice - previousPrice) / previousPrice) * 1000) /
+          10;
+      }
+
+      return {
+        id: ing.id,
+        name: ing.name,
+        category: ing.category,
+        unit: ing.unit,
+        currentPrice,
+        previousPrice,
+        changePercent,
+        recipesCount: ing._count.recipeItems,
+        createdAt: ing.createdAt,
+      };
+    });
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("List ingredients error:", error);
     return NextResponse.json(
