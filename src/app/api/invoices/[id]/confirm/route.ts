@@ -40,6 +40,21 @@ export async function POST(
       );
     }
 
+    // Validate the invoice's restaurant still exists
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { id: invoice.restaurantId },
+      select: { id: true },
+    });
+
+    if (!restaurant) {
+      return NextResponse.json(
+        {
+          error: "Restaurante no encontrado (posible reseed). Actualiza tu restaurantId.",
+        },
+        { status: 400 }
+      );
+    }
+
     if (invoice.status === "CONFIRMED") {
       return NextResponse.json(
         { error: "Esta factura ya fue confirmada" },
@@ -49,16 +64,26 @@ export async function POST(
 
     // 3. Run everything in a transaction — all or nothing
     const result = await prisma.$transaction(async (tx) => {
-      // Handle supplier
+      // Handle supplier — find existing first to avoid duplicates
       let supplierId = body.supplierId;
       if (!supplierId && body.supplierName) {
-        const newSupplier = await tx.supplier.create({
-          data: {
+        const existingSupplier = await tx.supplier.findFirst({
+          where: {
             name: body.supplierName,
             restaurantId: invoice.restaurantId,
           },
         });
-        supplierId = newSupplier.id;
+        if (existingSupplier) {
+          supplierId = existingSupplier.id;
+        } else {
+          const newSupplier = await tx.supplier.create({
+            data: {
+              name: body.supplierName,
+              restaurantId: invoice.restaurantId,
+            },
+          });
+          supplierId = newSupplier.id;
+        }
       }
 
       // Process each line item
@@ -209,9 +234,13 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Invoice confirm error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Invoice confirm error:", { message, error });
     return NextResponse.json(
-      { error: "Error al confirmar factura" },
+      {
+        error: "Error al confirmar factura",
+        details: message,
+      },
       { status: 500 }
     );
   }

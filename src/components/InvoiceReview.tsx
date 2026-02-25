@@ -34,6 +34,7 @@ export default function InvoiceReview({
     extraction.lineItems
   );
   const [isConfirming, setIsConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
 
   const updateLineItem = (
     index: number,
@@ -81,34 +82,54 @@ export default function InvoiceReview({
 
   const handleConfirm = async () => {
     setIsConfirming(true);
+    setConfirmError(null);
     try {
+      const payload = {
+        supplierId: null,
+        supplierName,
+        invoiceNumber,
+        invoiceDate,
+        subtotal: calculatedTotal,
+        tax: null,
+        total: calculatedTotal,
+        lineItems: lineItems.map((item) => ({
+          description: item.description,
+          quantity: item.quantity,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          ingredientId: null,
+          ingredientName: item.description,
+        })),
+      };
+
       const response = await fetch(`/api/invoices/${invoiceId}/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          supplierId: null,
-          supplierName,
-          invoiceNumber,
-          invoiceDate,
-          subtotal: calculatedTotal,
-          tax: null,
-          total: calculatedTotal,
-          lineItems: lineItems.map((item) => ({
-            description: item.description,
-            quantity: item.quantity,
-            unit: item.unit,
-            unitPrice: item.unitPrice,
-            totalPrice: item.totalPrice,
-            ingredientId: null,
-            ingredientName: item.description,
-          })),
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error("Failed to confirm");
+      if (!response.ok) {
+        let errorMsg = `Error ${response.status}`;
+        try {
+          const raw = await response.text();
+          const parsed = JSON.parse(raw);
+          errorMsg = parsed.error || parsed.details
+            ? `${parsed.error || "Error"}${parsed.details ? ` — ${JSON.stringify(parsed.details)}` : ""}`
+            : raw;
+        } catch {
+          // non-JSON response
+        }
+        console.error("Confirm failed:", { status: response.status, error: errorMsg });
+        setConfirmError(errorMsg);
+        return;
+      }
+
       onConfirm();
     } catch (error) {
+      const msg = error instanceof Error ? error.message : "Error de red al confirmar";
       console.error("Confirm error:", error);
+      setConfirmError(msg);
     } finally {
       setIsConfirming(false);
     }
@@ -334,6 +355,39 @@ export default function InvoiceReview({
           </div>
         </div>
       </div>
+
+      {/* Error banner */}
+      {confirmError && (
+        <div className="flex items-start gap-2.5 px-4 py-3 bg-[var(--danger-light)] border border-[var(--danger)]/20 rounded-xl">
+          <svg
+            className="w-4 h-4 text-[var(--danger)] shrink-0 mt-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+            />
+          </svg>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-[var(--danger)]">
+              Error al confirmar factura
+            </p>
+            <p className="text-xs text-[var(--danger)]/80 mt-0.5">
+              {confirmError}
+            </p>
+          </div>
+          <button
+            onClick={() => setConfirmError(null)}
+            className="text-[var(--danger)] hover:text-[var(--danger)]/80 text-xs font-medium shrink-0"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Action bar */}
       <div className="flex items-center justify-between pt-5 border-t border-[var(--border)]">
