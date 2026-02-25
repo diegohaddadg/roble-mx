@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  computeRecipeImpact,
+  generateSuggestions,
+  type PriceChange,
+  type RecipeInput,
+} from "@/lib/impact";
 
 export async function GET(
   request: NextRequest,
@@ -31,6 +37,8 @@ export async function GET(
 
     const empty = {
       ingredientsAffected: [],
+      recipeImpacts: [],
+      suggestions: [],
       summary: {
         totalRecipesAffected: 0,
         oldAvgFoodCostPercent: 0,
@@ -38,7 +46,6 @@ export async function GET(
       },
     };
 
-    // PriceHistory entries created during this invoice's confirmation
     const invoicePriceEntries = await prisma.priceHistory.findMany({
       where: { invoiceId },
       include: { ingredient: true },
@@ -48,16 +55,7 @@ export async function GET(
       return NextResponse.json(empty);
     }
 
-    // Phase 1 — determine which ingredients actually changed price
-    interface PriceChange {
-      ingredientId: string;
-      ingredientName: string;
-      unit: string;
-      oldPrice: number;
-      newPrice: number;
-      changePercent: number;
-    }
-
+    // Determine which ingredients actually changed price
     const priceChanges: PriceChange[] = [];
     const priceChangeMap = new Map<
       string,
@@ -80,16 +78,12 @@ export async function GET(
       const newPrice = Number(entry.price);
       if (oldPrice === newPrice) continue;
 
-      const changePercent =
-        Math.round(((newPrice - oldPrice) / oldPrice) * 1000) / 10;
-
       priceChanges.push({
         ingredientId: entry.ingredientId,
         ingredientName: entry.ingredient.name,
         unit: entry.ingredient.unit,
         oldPrice,
         newPrice,
-        changePercent,
       });
 
       priceChangeMap.set(entry.ingredientId, { oldPrice, newPrice });
@@ -99,7 +93,7 @@ export async function GET(
       return NextResponse.json(empty);
     }
 
-    // Phase 2 — find every recipe that uses a changed ingredient
+    // Find every recipe that uses a changed ingredient
     const changedIds = priceChanges.map((pc) => pc.ingredientId);
 
     const affectedRecipeItems = await prisma.recipeItem.findMany({
@@ -120,7 +114,31 @@ export async function GET(
       },
     });
 
-    // Group by ingredient for the per-ingredient breakdown
+    // Build unique recipe inputs for the pure computation
+    const uniqueRecipeMap = new Map<string, RecipeInput>();
+    for (const ri of affectedRecipeItems) {
+      if (uniqueRecipeMap.has(ri.recipe.id)) continue;
+      uniqueRecipeMap.set(ri.recipe.id, {
+        recipeId: ri.recipe.id,
+        recipeName: ri.recipe.name,
+        sellPrice: Number(ri.recipe.sellPrice),
+        yield: ri.recipe.yield || 1,
+        items: ri.recipe.items.map((item) => ({
+          ingredientId: item.ingredientId,
+          quantity: Number(item.quantity),
+          currentPrice: Number(item.ingredient.currentPrice ?? 0),
+        })),
+      });
+    }
+
+    // Compute impact for each recipe using pure functions
+    const recipeImpacts = Array.from(uniqueRecipeMap.values()).map((recipe) =>
+      computeRecipeImpact(recipe, priceChanges)
+    );
+
+    const suggestions = generateSuggestions(recipeImpacts);
+
+    // Build per-ingredient breakdown (with nested recipe impacts)
     const byIngredient = new Map<string, typeof affectedRecipeItems>();
     for (const ri of affectedRecipeItems) {
       const arr = byIngredient.get(ri.ingredientId) ?? [];
@@ -128,105 +146,59 @@ export async function GET(
       byIngredient.set(ri.ingredientId, arr);
     }
 
-    const ingredientsAffected = [];
-    const uniqueRecipeIds = new Set<string>();
+    const ingredientsAffected = priceChanges
+      .map((change) => {
+        const { delta, percent } = (() => {
+          const d = change.newPrice - change.oldPrice;
+          const p =
+            change.oldPrice > 0
+              ? Math.round(
+                  ((change.newPrice - change.oldPrice) / change.oldPrice) * 1000
+                ) / 10
+              : 0;
+          return { delta: d, percent: p };
+        })();
 
-    for (const change of priceChanges) {
-      const recipeItems = byIngredient.get(change.ingredientId) ?? [];
-      const recipesAffected = [];
-
-      for (const ri of recipeItems) {
-        const recipe = ri.recipe;
-        const sellPrice = Number(recipe.sellPrice);
-        const recipeYield = recipe.yield || 1;
-        const qtyInRecipe = Number(ri.quantity);
-
-        let newTotalCost = 0;
-        for (const item of recipe.items) {
-          newTotalCost +=
-            Number(item.quantity) *
-            Number(item.ingredient.currentPrice ?? 0);
-        }
-
-        const newFoodCost = newTotalCost / recipeYield;
-        const oldFoodCost =
-          (newTotalCost + qtyInRecipe * (change.oldPrice - change.newPrice)) /
-          recipeYield;
-
-        const newMargin =
-          sellPrice > 0
-            ? Math.round(((sellPrice - newFoodCost) / sellPrice) * 1000) / 10
-            : 0;
-        const oldMargin =
-          sellPrice > 0
-            ? Math.round(((sellPrice - oldFoodCost) / sellPrice) * 1000) / 10
-            : 0;
-
-        recipesAffected.push({
-          recipeId: recipe.id,
-          recipeName: recipe.name,
-          sellPrice,
-          oldFoodCost: Math.round(oldFoodCost * 100) / 100,
-          newFoodCost: Math.round(newFoodCost * 100) / 100,
-          oldMarginPercent: oldMargin,
-          newMarginPercent: newMargin,
+        const recipeItems = byIngredient.get(change.ingredientId) ?? [];
+        const recipesAffected = recipeItems.map((ri) => {
+          const impact = recipeImpacts.find(
+            (r) => r.recipeId === ri.recipe.id
+          );
+          return {
+            recipeId: ri.recipe.id,
+            recipeName: ri.recipe.name,
+            sellPrice: impact?.sellPrice ?? Number(ri.recipe.sellPrice),
+            oldFoodCost: impact?.oldFoodCost ?? 0,
+            newFoodCost: impact?.newFoodCost ?? 0,
+            oldMarginPercent: impact?.oldMarginPercent ?? 0,
+            newMarginPercent: impact?.newMarginPercent ?? 0,
+          };
         });
 
-        uniqueRecipeIds.add(recipe.id);
-      }
+        return {
+          ...change,
+          changePercent: percent,
+          delta,
+          recipesAffected,
+        };
+      })
+      .filter((ia) => ia.recipesAffected.length > 0);
 
-      if (recipesAffected.length > 0) {
-        ingredientsAffected.push({ ...change, recipesAffected });
-      }
-    }
-
-    // Phase 3 — summary: avg food cost % across unique affected recipes,
-    // accounting for ALL ingredient changes from this invoice at once
-    const uniqueRecipes = new Map<
-      string,
-      { sellPrice: number; oldFoodCost: number; newFoodCost: number }
-    >();
-
-    for (const ri of affectedRecipeItems) {
-      if (uniqueRecipes.has(ri.recipe.id)) continue;
-
-      const recipe = ri.recipe;
-      const sellPrice = Number(recipe.sellPrice);
-      const recipeYield = recipe.yield || 1;
-
-      let newTotal = 0;
-      let oldTotal = 0;
-      for (const item of recipe.items) {
-        const qty = Number(item.quantity);
-        const currentPrice = Number(item.ingredient.currentPrice ?? 0);
-        newTotal += qty * currentPrice;
-
-        const delta = priceChangeMap.get(item.ingredientId);
-        oldTotal += qty * (delta ? delta.oldPrice : currentPrice);
-      }
-
-      uniqueRecipes.set(recipe.id, {
-        sellPrice,
-        newFoodCost: newTotal / recipeYield,
-        oldFoodCost: oldTotal / recipeYield,
-      });
-    }
-
+    // Summary
     let sumOldPct = 0;
     let sumNewPct = 0;
-    for (const [, r] of uniqueRecipes) {
-      if (r.sellPrice > 0) {
-        sumOldPct += (r.oldFoodCost / r.sellPrice) * 100;
-        sumNewPct += (r.newFoodCost / r.sellPrice) * 100;
-      }
+    for (const r of recipeImpacts) {
+      sumOldPct += r.oldFoodCostPercent;
+      sumNewPct += r.newFoodCostPercent;
     }
-
-    const count = uniqueRecipes.size;
+    const count = recipeImpacts.length;
 
     return NextResponse.json({
       ingredientsAffected,
+      recipeImpacts,
+      suggestions,
       summary: {
-        totalRecipesAffected: uniqueRecipeIds.size,
+        totalRecipesAffected: recipeImpacts.length,
         oldAvgFoodCostPercent:
           count > 0 ? Math.round((sumOldPct / count) * 10) / 10 : 0,
         newAvgFoodCostPercent:

@@ -1,12 +1,31 @@
-// app/api/invoices/upload/route.ts
-// Handles invoice image upload → AI extraction → creates pending invoice
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { extractInvoiceData } from "@/lib/extraction";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { randomUUID } from "crypto";
+
+async function storeFile(
+  buffer: Buffer,
+  fileName: string,
+  contentType: string
+): Promise<string> {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const { put } = await import("@vercel/blob");
+    const blob = await put(`invoices/${fileName}`, buffer, {
+      access: "public",
+      contentType,
+    });
+    return blob.url;
+  }
+
+  // Local fallback for dev without blob token
+  const { writeFile, mkdir } = await import("fs/promises");
+  const path = await import("path");
+  const uploadsDir = path.join(process.cwd(), "public", "uploads");
+  await mkdir(uploadsDir, { recursive: true });
+  const filePath = path.join(uploadsDir, fileName);
+  await writeFile(filePath, buffer);
+  return `/uploads/${fileName}`;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +44,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate restaurantId exists in DB
     let validRestaurantId = restaurantId;
     const restaurant = await prisma.restaurant.findUnique({
       where: { id: restaurantId },
@@ -44,25 +62,18 @@ export async function POST(request: NextRequest) {
           validRestaurantId = fallback.id;
         } else {
           return NextResponse.json(
-            {
-              error:
-                "No existe ningún restaurante. Ejecuta npx prisma db seed primero.",
-            },
+            { error: "No existe ningún restaurante. Ejecuta npx prisma db seed primero." },
             { status: 400 }
           );
         }
       } else {
         return NextResponse.json(
-          {
-            error:
-              "Restaurante no encontrado. Actualiza tu restaurantId después de reseed.",
-          },
+          { error: "Restaurante no encontrado. Actualiza tu restaurantId después de reseed." },
           { status: 400 }
         );
       }
     }
 
-    // Validate file type
     const allowedTypes = [
       "image/jpeg",
       "image/png",
@@ -76,7 +87,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 10 MB server-side limit
     const MAX_SIZE = 10 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
@@ -85,24 +95,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save file to local storage
-    // FUTURE: Replace with S3/Cloudflare R2 for production
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true });
-
+    const buffer = Buffer.from(await file.arrayBuffer());
     const fileExt = file.name.split(".").pop() || "jpg";
     const fileName = `${randomUUID()}.${fileExt}`;
-    const filePath = path.join(uploadsDir, fileName);
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filePath, buffer);
+    const imageUrl = await storeFile(buffer, fileName, file.type);
 
-    const imageUrl = `/uploads/${fileName}`;
-
-    // Run AI extraction pipeline
     const extraction = await extractInvoiceData(buffer, file.type);
 
-    // Create invoice record with PENDING_REVIEW status
     const invoice = await prisma.invoice.create({
       data: {
         restaurantId: validRestaurantId,
