@@ -124,11 +124,11 @@ export default function InvoiceReview({
 
         const friendlyMessages: Record<string, string> = {
           "Restaurante no encontrado (posible reseed). Actualiza tu restaurantId.":
-            "Restaurant inválido. Ve a configuración y pega el Restaurant ID correcto.",
+            "Restaurante no encontrado. Cierra sesión y vuelve a entrar.",
           "restaurantId missing":
-            "Restaurant ID no configurado.",
+            "Sesión no válida. Cierra sesión y vuelve a entrar.",
           "Invalid restaurantId":
-            "Restaurant ID inválido. Ve a configuración.",
+            "Sesión no válida. Cierra sesión y vuelve a entrar.",
         };
         setConfirmError(friendlyMessages[errorMsg] || errorMsg);
         return;

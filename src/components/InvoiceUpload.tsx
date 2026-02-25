@@ -43,11 +43,11 @@ export default function InvoiceUpload({
 
           const friendlyMessages: Record<string, string> = {
             "restaurantId is required":
-              "Restaurant ID no configurado. Ve a configuración y pega tu Restaurant ID.",
+              "Sesión no válida. Cierra sesión y vuelve a entrar.",
             "Restaurante no encontrado. Actualiza tu restaurantId después de reseed.":
-              "Restaurant inválido. Ve a configuración y pega el Restaurant ID correcto.",
+              "Restaurante no encontrado. Cierra sesión y vuelve a entrar.",
             "No existe ningún restaurante. Ejecuta npx prisma db seed primero.":
-              "No hay restaurantes en la base de datos. Ejecuta el seed primero.",
+              "No hay restaurantes. Crea uno desde la pantalla de inicio.",
           };
 
           throw new Error(friendlyMessages[serverError] || serverError);
