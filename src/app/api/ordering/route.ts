@@ -6,9 +6,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const restaurantId = searchParams.get("restaurantId");
 
+    const emptySummary = { totalItems: 0, totalEstimatedCost: 0 };
+
     if (!restaurantId) {
       return NextResponse.json(
-        { error: "restaurantId is required" },
+        { error: "restaurantId is required", suggestions: [], summary: emptySummary },
         { status: 400 }
       );
     }
@@ -110,7 +112,11 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Ordering suggestions error:", error);
     return NextResponse.json(
-      { error: "Failed to generate ordering suggestions" },
+      {
+        error: "Failed to generate ordering suggestions",
+        suggestions: [],
+        summary: { totalItems: 0, totalEstimatedCost: 0 },
+      },
       { status: 500 }
     );
   }

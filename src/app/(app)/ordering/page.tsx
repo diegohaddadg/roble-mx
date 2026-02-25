@@ -44,16 +44,27 @@ export default function OrderingPage() {
   const { restaurantId } = useRestaurant();
   const [data, setData] = useState<OrderingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
     if (!restaurantId) return;
     setIsLoading(true);
+    setHasError(false);
     try {
       const res = await fetch(`/api/ordering?restaurantId=${restaurantId}`);
-      setData(await res.json());
+      const json = await res.json();
+      setData({
+        suggestions: Array.isArray(json?.suggestions) ? json.suggestions : [],
+        summary: {
+          totalItems: json?.summary?.totalItems ?? 0,
+          totalEstimatedCost: json?.summary?.totalEstimatedCost ?? 0,
+        },
+      });
     } catch (err) {
       console.error("Load ordering error:", err);
+      setHasError(true);
+      setData(null);
     } finally {
       setIsLoading(false);
     }
@@ -63,14 +74,16 @@ export default function OrderingPage() {
     load();
   }, [load]);
 
+  const suggestions = data?.suggestions ?? [];
+  const summary = data?.summary ?? { totalItems: 0, totalEstimatedCost: 0 };
+
   const whatsAppText = useMemo(() => {
-    if (!data?.suggestions.length) return "";
-    const lines = data.suggestions.map(
-      (s) =>
-        `- ${s.name}: ${s.suggestedQty} ${s.unit}`
+    if (!suggestions.length) return "";
+    const lines = suggestions.map(
+      (s) => `- ${s.name}: ${s.suggestedQty} ${s.unit}`
     );
-    return `Lista de pedido:\n${lines.join("\n")}\n\nTotal estimado: $${data.summary.totalEstimatedCost.toLocaleString("es-MX", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-  }, [data]);
+    return `Lista de pedido:\n${lines.join("\n")}\n\nTotal estimado: $${summary.totalEstimatedCost.toLocaleString("es-MX", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  }, [suggestions, summary]);
 
   const handleCopy = async () => {
     try {
@@ -117,7 +130,37 @@ export default function OrderingPage() {
             />
           ))}
         </div>
-      ) : !data || data.suggestions.length === 0 ? (
+      ) : hasError ? (
+        <div className="text-center py-20">
+          <div className="w-14 h-14 bg-[var(--danger-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-7 h-7 text-[var(--danger)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+              />
+            </svg>
+          </div>
+          <h3 className="font-semibold text-[var(--text)] mb-1">
+            Algo salió mal
+          </h3>
+          <p className="text-sm text-[var(--muted)] mb-5">
+            No pudimos calcular las sugerencias. Intenta de nuevo.
+          </p>
+          <button
+            onClick={load}
+            className="px-5 py-2 text-sm font-medium text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] rounded-xl transition-colors active:scale-[0.98]"
+          >
+            Reintentar
+          </button>
+        </div>
+      ) : suggestions.length === 0 ? (
         <div className="text-center py-20">
           <div className="w-14 h-14 bg-[var(--success-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg
@@ -137,9 +180,23 @@ export default function OrderingPage() {
           <h3 className="font-semibold text-[var(--text)] mb-1">
             No necesitas pedir nada ahora
           </h3>
-          <p className="text-sm text-[var(--muted)]">
+          <p className="text-sm text-[var(--muted)] mb-5">
             Tu inventario está cubierto. Revisa de nuevo en unos días.
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/inventory"
+              className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium"
+            >
+              Ir a Inventario →
+            </Link>
+            <Link
+              href="/scanner"
+              className="text-sm text-[var(--muted)] hover:text-[var(--text)] font-medium"
+            >
+              Escanear factura →
+            </Link>
+          </div>
         </div>
       ) : (
         <>
@@ -167,7 +224,7 @@ export default function OrderingPage() {
             </div>
 
             <div className="divide-y divide-[var(--border-light)]">
-              {data.suggestions.map((s) => (
+              {suggestions.map((s) => (
                 <div
                   key={s.ingredientId}
                   className="grid grid-cols-12 gap-2 px-5 py-3 items-center"
@@ -203,12 +260,12 @@ export default function OrderingPage() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <div className="text-sm text-[var(--muted)]">
-                  {data.summary.totalItems} ingrediente
-                  {data.summary.totalItems !== 1 ? "s" : ""} por pedir
+                  {summary.totalItems} ingrediente
+                  {summary.totalItems !== 1 ? "s" : ""} por pedir
                 </div>
                 <div className="text-2xl font-bold text-[var(--text)] tabular-nums">
                   $
-                  {data.summary.totalEstimatedCost.toLocaleString("es-MX", {
+                  {summary.totalEstimatedCost.toLocaleString("es-MX", {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0,
                   })}
