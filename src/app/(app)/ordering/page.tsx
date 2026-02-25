@@ -32,6 +32,12 @@ interface SupplierGroup {
   subtotal: number;
 }
 
+interface LastInvoice {
+  total: number | null;
+  invoiceDate: string | null;
+  supplierName: string | null;
+}
+
 function fmt(val: number): string {
   return `$${Number(val).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
@@ -52,6 +58,31 @@ function ReasonBadge({ reason }: { reason: string }) {
   );
 }
 
+function InfoTooltip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <span className="relative inline-block">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[var(--border-light)] text-[var(--muted)] text-[11px] font-bold hover:bg-[var(--border)] transition-colors cursor-help"
+        aria-label="Información"
+      >
+        ⓘ
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-[var(--text)] text-white text-xs rounded-xl shadow-lg z-50 leading-relaxed">
+          {text}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-0 h-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-[var(--text)]" />
+        </div>
+      )}
+    </span>
+  );
+}
+
 function buildWhatsAppMessage(group: SupplierGroup): string {
   const lines = group.items.map(
     (s) => `- ${s.name}: ${s.suggestedQty} ${s.unit}`
@@ -63,10 +94,91 @@ function cleanPhone(phone: string): string {
   return phone.replace(/[^0-9]/g, "");
 }
 
+/* ── Comparison strip ── */
+function ComparisonCard({
+  lastInvoice,
+  suggestedTotal,
+}: {
+  lastInvoice: LastInvoice | null;
+  suggestedTotal: number;
+}) {
+  const hasInvoice = lastInvoice && lastInvoice.total != null;
+  const invoiceTotal = hasInvoice ? Number(lastInvoice!.total) : 0;
+  const diff = suggestedTotal - invoiceTotal;
+
+  return (
+    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-4 sm:p-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        {/* Last invoice */}
+        <div className="text-center sm:text-left">
+          <div className="text-[11px] font-medium text-[var(--muted)] uppercase tracking-wide mb-1">
+            Última factura confirmada
+          </div>
+          <div className="text-lg font-bold text-[var(--text)] tabular-nums">
+            {hasInvoice ? fmt(invoiceTotal) : "—"}
+          </div>
+          {lastInvoice?.invoiceDate && (
+            <div className="text-[11px] text-[var(--muted)]">
+              {new Date(lastInvoice.invoiceDate).toLocaleDateString("es-MX", {
+                day: "numeric",
+                month: "short",
+              })}
+              {lastInvoice.supplierName && ` · ${lastInvoice.supplierName}`}
+            </div>
+          )}
+        </div>
+
+        {/* Suggested total */}
+        <div className="text-center sm:text-left">
+          <div className="text-[11px] font-medium text-[var(--muted)] uppercase tracking-wide mb-1">
+            Pedido sugerido hoy
+          </div>
+          <div className="text-lg font-bold text-[var(--primary)] tabular-nums">
+            {fmt(suggestedTotal)}
+          </div>
+          <div className="text-[11px] text-[var(--muted)]">
+            Basado en inventario actual
+          </div>
+        </div>
+
+        {/* Difference */}
+        {hasInvoice && (
+          <div className="text-center sm:text-left">
+            <div className="text-[11px] font-medium text-[var(--muted)] uppercase tracking-wide mb-1">
+              Diferencia
+            </div>
+            <div
+              className={`text-lg font-bold tabular-nums ${diff > 0 ? "text-[var(--danger)]" : diff < 0 ? "text-[var(--success)]" : "text-[var(--muted)]"}`}
+            >
+              {diff > 0 ? "+" : ""}
+              {fmt(diff)}
+            </div>
+            <div className="text-[11px] text-[var(--muted)]">
+              vs última factura
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Loading skeleton ── */
 function OrderingSkeleton() {
   return (
     <div className="space-y-5 animate-pulse">
+      {/* Comparison skeleton */}
+      <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] p-5">
+        <div className="grid grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <div className="h-3 w-24 bg-[var(--border-light)] rounded" />
+              <div className="h-6 w-20 bg-[var(--border-light)] rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+
       {Array.from({ length: 3 }).map((_, i) => (
         <div
           key={i}
@@ -265,7 +377,7 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
               <th>Ingrediente</th>
               <th className="r">Cantidad</th>
               <th>Unidad</th>
-              <th className="r">Costo est.</th>
+              <th className="r">Costo pedido</th>
             </tr>
           </thead>
           <tbody>
@@ -279,7 +391,9 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
             ))}
           </tbody>
         </table>
-        <div className="total">Total estimado: {fmt(group.subtotal)}</div>
+        <div className="total">
+          Total estimado de reposición: {fmt(group.subtotal)}
+        </div>
       </div>
 
       {/* Desktop table header */}
@@ -289,7 +403,12 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
         <div className="col-span-1 text-center">Unidad</div>
         <div className="col-span-2 text-right">En mano</div>
         <div className="col-span-2">Motivo</div>
-        <div className="col-span-2 text-right">Costo est.</div>
+        <div className="col-span-2 text-right">
+          <span>Costo pedido</span>
+          <span className="block normal-case tracking-normal font-normal text-[10px]">
+            (cantidad × precio)
+          </span>
+        </div>
       </div>
 
       {/* Desktop table rows */}
@@ -385,6 +504,7 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
 export default function OrderingPage() {
   const { restaurantId } = useRestaurant();
   const [data, setData] = useState<OrderingData | null>(null);
+  const [lastInvoice, setLastInvoice] = useState<LastInvoice | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -393,9 +513,15 @@ export default function OrderingPage() {
     setIsLoading(true);
     setHasError(false);
     try {
-      const res = await fetch(`/api/ordering?restaurantId=${restaurantId}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const [orderingRes, invoicesRes] = await Promise.all([
+        fetch(`/api/ordering?restaurantId=${restaurantId}`),
+        fetch(
+          `/api/invoices?restaurantId=${restaurantId}&status=CONFIRMED`
+        ),
+      ]);
+
+      if (!orderingRes.ok) throw new Error(`HTTP ${orderingRes.status}`);
+      const json = await orderingRes.json();
       setData({
         suggestions: Array.isArray(json?.suggestions) ? json.suggestions : [],
         summary: {
@@ -403,6 +529,18 @@ export default function OrderingPage() {
           totalEstimatedCost: json?.summary?.totalEstimatedCost ?? 0,
         },
       });
+
+      if (invoicesRes.ok) {
+        const invoices = await invoicesRes.json();
+        if (Array.isArray(invoices) && invoices.length > 0) {
+          const latest = invoices[0];
+          setLastInvoice({
+            total: latest.total ? Number(latest.total) : null,
+            invoiceDate: latest.invoiceDate,
+            supplierName: latest.supplier?.name ?? null,
+          });
+        }
+      }
     } catch (err) {
       console.error("Load ordering error:", err);
       setHasError(true);
@@ -477,6 +615,12 @@ export default function OrderingPage() {
         <OrderingEmpty />
       ) : (
         <>
+          {/* Comparison card */}
+          <ComparisonCard
+            lastInvoice={lastInvoice}
+            suggestedTotal={summary.totalEstimatedCost}
+          />
+
           {/* Supplier cards */}
           <div className="space-y-4 sm:space-y-5">
             {groups.map((g) => (
@@ -496,16 +640,23 @@ export default function OrderingPage() {
                   {summary.totalItems !== 1 ? "s" : ""} · {groups.length}{" "}
                   proveedor{groups.length !== 1 ? "es" : ""}
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-[var(--text)] tabular-nums">
-                  {fmt(summary.totalEstimatedCost)}
-                  <span className="text-xs sm:text-sm font-normal text-[var(--muted)] ml-1">
-                    costo total estimado
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xl sm:text-2xl font-bold text-[var(--text)] tabular-nums">
+                    {fmt(summary.totalEstimatedCost)}
                   </span>
+                  <span className="text-xs sm:text-sm font-normal text-[var(--muted)]">
+                    costo estimado de reposición
+                  </span>
+                  <InfoTooltip text="Pedido sugerido = (cantidad a pedir) × (precio unitario) por ingrediente. Se genera cuando tu stock está 'Bajo' o 'Crítico'." />
                 </div>
+                <p className="text-[11px] text-[var(--muted)] mt-1">
+                  Este monto NO es el total de tu última factura. Se calcula con
+                  base en tu inventario actual y cantidades sugeridas.
+                </p>
               </div>
               <Link
                 href="/suppliers"
-                className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium"
+                className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium shrink-0"
               >
                 Gestionar proveedores →
               </Link>
