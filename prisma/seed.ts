@@ -9,6 +9,8 @@ async function main() {
   console.log("🌱 Seeding database...\n");
 
   // Clean existing data
+  await prisma.inventoryMovement.deleteMany();
+  await prisma.inventoryLevel.deleteMany();
   await prisma.priceHistory.deleteMany();
   await prisma.recipeItem.deleteMany();
   await prisma.recipe.deleteMany();
@@ -352,6 +354,243 @@ async function main() {
     });
   }
   console.log(`✅ ${invoicesData.length} confirmed invoices created`);
+
+  // ─── INVENTORY LEVELS + MOVEMENTS ──────────────────────
+  // Create varied inventory states: OK, Bajo, Crítico
+  const inventoryConfig: {
+    key: keyof typeof ing;
+    onHand: number;
+    low: number;
+    critical: number;
+    movements: { delta: number; source: string; notes: string | null; daysAgo: number }[];
+  }[] = [
+    {
+      key: "pollo",
+      onHand: 8.5,
+      low: 5,
+      critical: 2,
+      movements: [
+        { delta: 15, source: "INVOICE", notes: null, daysAgo: 9 },
+        { delta: -3.5, source: "MANUAL_ADJUST", notes: "Uso diario cocina", daysAgo: 7 },
+        { delta: 12, source: "INVOICE", notes: null, daysAgo: 2 },
+        { delta: -5, source: "MANUAL_ADJUST", notes: "Uso fin de semana", daysAgo: 1 },
+        { delta: -10, source: "MANUAL_ADJUST", notes: "Consumo semanal", daysAgo: 0 },
+      ],
+    },
+    {
+      key: "arrachera",
+      onHand: 2.5,
+      low: 3,
+      critical: 1,
+      movements: [
+        { delta: 6, source: "INVOICE", notes: null, daysAgo: 9 },
+        { delta: -2, source: "MANUAL_ADJUST", notes: "Consumo viernes", daysAgo: 5 },
+        { delta: 8, source: "INVOICE", notes: null, daysAgo: 2 },
+        { delta: -4, source: "MANUAL_ADJUST", notes: "Evento privado", daysAgo: 1 },
+        { delta: -5.5, source: "MANUAL_ADJUST", notes: "Fin de semana alto", daysAgo: 0 },
+      ],
+    },
+    {
+      key: "cerdo",
+      onHand: 7,
+      low: 4,
+      critical: 1.5,
+      movements: [
+        { delta: 10, source: "INVOICE", notes: null, daysAgo: 9 },
+        { delta: -3, source: "MANUAL_ADJUST", notes: "Prep tacos al pastor", daysAgo: 4 },
+        { delta: 10, source: "INVOICE", notes: null, daysAgo: 2 },
+        { delta: -10, source: "MANUAL_ADJUST", notes: "Consumo semanal", daysAgo: 0 },
+      ],
+    },
+    {
+      key: "camaron",
+      onHand: 0.8,
+      low: 2,
+      critical: 1,
+      movements: [
+        { delta: 4, source: "INVOICE", notes: null, daysAgo: 9 },
+        { delta: -1.5, source: "MANUAL_ADJUST", notes: "Tacos de camarón", daysAgo: 5 },
+        { delta: -1.7, source: "MANUAL_ADJUST", notes: "Pedido especial", daysAgo: 2 },
+      ],
+    },
+    {
+      key: "tomate",
+      onHand: 4,
+      low: 4,
+      critical: 2,
+      movements: [
+        { delta: 10, source: "INVOICE", notes: null, daysAgo: 3 },
+        { delta: -3, source: "MANUAL_ADJUST", notes: "Salsas del día", daysAgo: 2 },
+        { delta: -3, source: "MANUAL_ADJUST", notes: "Consumo diario", daysAgo: 0 },
+      ],
+    },
+    {
+      key: "cebolla",
+      onHand: 5,
+      low: 3,
+      critical: 1,
+      movements: [
+        { delta: 8, source: "INVOICE", notes: null, daysAgo: 3 },
+        { delta: -3, source: "MANUAL_ADJUST", notes: "Prep general", daysAgo: 1 },
+      ],
+    },
+    {
+      key: "aguacate",
+      onHand: 1.2,
+      low: 2,
+      critical: 1,
+      movements: [
+        { delta: 5, source: "INVOICE", notes: null, daysAgo: 3 },
+        { delta: -2, source: "MANUAL_ADJUST", notes: "Guacamole", daysAgo: 2 },
+        { delta: -1.8, source: "MANUAL_ADJUST", notes: "Tacos camarón", daysAgo: 0 },
+      ],
+    },
+    {
+      key: "limon",
+      onHand: 1.5,
+      low: 1.5,
+      critical: 0.5,
+      movements: [
+        { delta: 3, source: "INVOICE", notes: null, daysAgo: 3 },
+        { delta: -1.5, source: "MANUAL_ADJUST", notes: "Aguas + tacos", daysAgo: 0 },
+      ],
+    },
+    {
+      key: "chile",
+      onHand: 2.5,
+      low: 1.5,
+      critical: 0.5,
+      movements: [
+        { delta: 3, source: "INVOICE", notes: null, daysAgo: 5 },
+        { delta: -0.5, source: "MANUAL_ADJUST", notes: "Salsas", daysAgo: 2 },
+      ],
+    },
+    {
+      key: "cilantro",
+      onHand: 3,
+      low: 4,
+      critical: 2,
+      movements: [
+        { delta: 8, source: "INVOICE", notes: null, daysAgo: 4 },
+        { delta: -5, source: "MANUAL_ADJUST", notes: "Se marchitó parte", daysAgo: 1 },
+      ],
+    },
+    {
+      key: "quesoOaxaca",
+      onHand: 2,
+      low: 2,
+      critical: 1,
+      movements: [
+        { delta: 5, source: "INVOICE", notes: null, daysAgo: 4 },
+        { delta: -3, source: "MANUAL_ADJUST", notes: "Quesadillas alto volumen", daysAgo: 1 },
+      ],
+    },
+    {
+      key: "crema",
+      onHand: 2.5,
+      low: 2,
+      critical: 0.5,
+      movements: [
+        { delta: 4, source: "INVOICE", notes: null, daysAgo: 4 },
+        { delta: -1.5, source: "MANUAL_ADJUST", notes: "Guarniciones", daysAgo: 1 },
+      ],
+    },
+    {
+      key: "aceite",
+      onHand: 6,
+      low: 3,
+      critical: 1,
+      movements: [
+        { delta: 10, source: "INVOICE", notes: null, daysAgo: 10 },
+        { delta: -4, source: "MANUAL_ADJUST", notes: "Freído semanal", daysAgo: 3 },
+      ],
+    },
+    {
+      key: "tortillaMaiz",
+      onHand: 3,
+      low: 5,
+      critical: 2,
+      movements: [
+        { delta: 10, source: "INVOICE", notes: null, daysAgo: 5 },
+        { delta: -4, source: "MANUAL_ADJUST", notes: "Tacos miércoles", daysAgo: 3 },
+        { delta: -3, source: "MANUAL_ADJUST", notes: "Tacos viernes", daysAgo: 0 },
+      ],
+    },
+    {
+      key: "tortillaHarina",
+      onHand: 4,
+      low: 3,
+      critical: 1,
+      movements: [
+        { delta: 8, source: "INVOICE", notes: null, daysAgo: 6 },
+        { delta: -4, source: "MANUAL_ADJUST", notes: "Quesadillas semana", daysAgo: 1 },
+      ],
+    },
+    {
+      key: "arroz",
+      onHand: 8,
+      low: 4,
+      critical: 2,
+      movements: [
+        { delta: 10, source: "INVOICE", notes: null, daysAgo: 10 },
+        { delta: -2, source: "MANUAL_ADJUST", notes: "Arroz con pollo", daysAgo: 3 },
+      ],
+    },
+    {
+      key: "frijol",
+      onHand: 5,
+      low: 3,
+      critical: 1,
+      movements: [
+        { delta: 8, source: "INVOICE", notes: null, daysAgo: 10 },
+        { delta: -3, source: "MANUAL_ADJUST", notes: "Charros + refritos", daysAgo: 2 },
+      ],
+    },
+    {
+      key: "pina",
+      onHand: 1,
+      low: 2,
+      critical: 1,
+      movements: [
+        { delta: 4, source: "INVOICE", notes: null, daysAgo: 7 },
+        { delta: -3, source: "MANUAL_ADJUST", notes: "Tacos al pastor", daysAgo: 1 },
+      ],
+    },
+  ];
+
+  for (const cfg of inventoryConfig) {
+    const ingredient = ing[cfg.key];
+
+    await prisma.inventoryLevel.create({
+      data: {
+        ingredientId: ingredient.id,
+        onHand: cfg.onHand,
+        lowThreshold: cfg.low,
+        criticalThreshold: cfg.critical,
+      },
+    });
+
+    // Build movement trail that ends at onHand
+    let running = 0;
+    for (const mv of cfg.movements) {
+      running = Math.max(0, running + mv.delta);
+      const mvDate = new Date(now);
+      mvDate.setDate(mvDate.getDate() - mv.daysAgo);
+      mvDate.setHours(7 + Math.floor(Math.random() * 10), Math.floor(Math.random() * 60));
+
+      await prisma.inventoryMovement.create({
+        data: {
+          ingredientId: ingredient.id,
+          delta: mv.delta,
+          newOnHand: running,
+          source: mv.source,
+          notes: mv.notes,
+          createdAt: mvDate,
+        },
+      });
+    }
+  }
+  console.log(`✅ ${inventoryConfig.length} inventory levels + movements seeded`);
 
   console.log("\n🎉 Seed complete!");
   console.log(`\n📋 Restaurant ID: ${restaurant.id}`);

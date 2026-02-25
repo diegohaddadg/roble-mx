@@ -8,6 +8,7 @@ const navItems = [
   { href: "/scanner", label: "Facturas" },
   { href: "/invoices", label: "Historial" },
   { href: "/ingredients", label: "Ingredientes" },
+  { href: "/inventory", label: "Inventario" },
   { href: "/recipes", label: "Recetas" },
   { href: "/dashboard", label: "Dashboard" },
 ] as const;

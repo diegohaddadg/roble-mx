@@ -64,10 +64,12 @@ model Ingredient {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  lineItems    LineItem[]
-  priceHistory PriceHistory[]
-  recipeItems  RecipeItem[]
+  restaurant         Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  lineItems          LineItem[]
+  priceHistory       PriceHistory[]
+  recipeItems        RecipeItem[]
+  inventoryLevel     InventoryLevel?
+  inventoryMovements InventoryMovement[]
 
   @@unique([name, restaurantId])
   @@index([restaurantId])
@@ -177,4 +179,37 @@ model RecipeItem {
 
   @@index([recipeId])
   @@map("recipe_items")
+}
+
+// ─── INVENTORY LEVEL ──────────────────────────────────────
+model InventoryLevel {
+  id                String   @id @default(cuid())
+  ingredientId      String   @unique
+  onHand            Decimal  @db.Decimal(10, 3)
+  lowThreshold      Decimal  @default(3) @db.Decimal(10, 3)
+  criticalThreshold Decimal  @default(1) @db.Decimal(10, 3)
+  updatedAt         DateTime @updatedAt
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([ingredientId])
+  @@map("inventory_levels")
+}
+
+// ─── INVENTORY MOVEMENT ───────────────────────────────────
+model InventoryMovement {
+  id           String   @id @default(cuid())
+  ingredientId String
+  delta        Decimal  @db.Decimal(10, 3)
+  newOnHand    Decimal  @db.Decimal(10, 3)
+  source       String
+  notes        String?
+  invoiceId    String?
+  createdAt    DateTime @default(now())
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([ingredientId])
+  @@index([ingredientId, createdAt])
+  @@map("inventory_movements")
 }

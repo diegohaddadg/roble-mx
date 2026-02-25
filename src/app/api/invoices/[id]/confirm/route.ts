@@ -160,6 +160,41 @@ export async function POST(
         },
       });
 
+      // ── Inventory: update on-hand for each linked line item ──
+      for (const item of processedItems) {
+        if (!item.ingredientId || !item.quantity) continue;
+        const qty = Number(item.quantity);
+        if (qty <= 0 || isNaN(qty)) continue;
+
+        const existing = await tx.inventoryLevel.findUnique({
+          where: { ingredientId: item.ingredientId },
+        });
+
+        const oldOnHand = existing ? Number(existing.onHand) : 0;
+        const newOnHand = Math.max(0, oldOnHand + qty);
+
+        await tx.inventoryLevel.upsert({
+          where: { ingredientId: item.ingredientId },
+          create: {
+            ingredientId: item.ingredientId,
+            onHand: newOnHand,
+          },
+          update: {
+            onHand: newOnHand,
+          },
+        });
+
+        await tx.inventoryMovement.create({
+          data: {
+            ingredientId: item.ingredientId,
+            delta: qty,
+            newOnHand,
+            source: "INVOICE",
+            invoiceId,
+          },
+        });
+      }
+
       return updatedInvoice;
     });
 
