@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useRestaurant } from "@/context/restaurant";
+import { useState } from "react";
 
 const navItems = [
   { href: "/scanner", label: "Facturas" },
@@ -17,7 +18,20 @@ const navItems = [
 
 export default function AppNav() {
   const pathname = usePathname();
-  const { restaurantId } = useRestaurant();
+  const router = useRouter();
+  const { restaurantId, restaurantName, clearSession } = useRestaurant();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      clearSession();
+      router.push("/");
+    } catch {
+      setLoggingOut(false);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[var(--border)]">
@@ -28,7 +42,7 @@ export default function AppNav() {
               <span className="text-white font-bold text-sm">T</span>
             </div>
             <span className="font-semibold text-[var(--text)] hidden sm:block">
-              Toast MX
+              {restaurantName || "Toast MX"}
             </span>
           </Link>
 
@@ -53,6 +67,16 @@ export default function AppNav() {
                 })}
               </div>
             </div>
+          )}
+
+          {restaurantId && (
+            <button
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="shrink-0 px-3 py-1.5 text-[13px] font-medium text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-light)] rounded-lg transition-all duration-150 whitespace-nowrap"
+            >
+              Salir
+            </button>
           )}
         </div>
       </div>

@@ -9,7 +9,7 @@ import { useRestaurant } from "@/context/restaurant";
 import { UploadResponse } from "@/lib/types";
 
 export default function ScannerPage() {
-  const { restaurantId, setRestaurantId } = useRestaurant();
+  const { restaurantId } = useRestaurant();
   const router = useRouter();
   const [currentUpload, setCurrentUpload] = useState<UploadResponse | null>(
     null
@@ -17,15 +17,9 @@ export default function ScannerPage() {
   const [confirmedCount, setConfirmedCount] = useState(0);
   const [lastConfirmedId, setLastConfirmedId] = useState<string | null>(null);
 
-  const handleUploadComplete = useCallback(
-    (data: UploadResponse) => {
-      if (data.usedFallbackRestaurantId) {
-        setRestaurantId(data.usedFallbackRestaurantId);
-      }
-      setCurrentUpload(data);
-    },
-    [setRestaurantId]
-  );
+  const handleUploadComplete = useCallback((data: UploadResponse) => {
+    setCurrentUpload(data);
+  }, []);
 
   const handleConfirm = useCallback(async () => {
     if (!currentUpload) return;

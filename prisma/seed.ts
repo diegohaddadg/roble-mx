@@ -3,6 +3,7 @@
 // After seeding, every page in Toast MX shows meaningful data.
 
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -29,6 +30,7 @@ async function main() {
   await prisma.restaurant.deleteMany();
 
   // ─── RESTAURANT ──────────────────────────────────────────
+  const pinHash = await bcrypt.hash("1234", 10);
   const restaurant = await prisma.restaurant.create({
     data: {
       name: "La Terraza Roma",
@@ -38,6 +40,9 @@ async function main() {
       state: "Ciudad de México",
       phone: "+52 55 1234 5678",
       email: "admin@laterrazaroma.mx",
+      ownerName: "Diego",
+      ownerWhatsApp: "+525512345678",
+      pinHash,
     },
   });
   console.log(`✅ Restaurant: ${restaurant.name}`);
@@ -599,8 +604,10 @@ async function main() {
   console.log(`✅ ${inventoryConfig.length} inventory levels + movements seeded`);
 
   console.log("\n🎉 Seed complete!");
-  console.log(`\n📋 Restaurant ID: ${restaurant.id}`);
-  console.log("   Copy this and paste it in the app.\n");
+  console.log(`\n📋 Restaurant: ${restaurant.name}`);
+  console.log(`   WhatsApp: +525512345678`);
+  console.log(`   PIN: 1234`);
+  console.log(`   Go to /enter and use these credentials.\n`);
 }
 
 main()

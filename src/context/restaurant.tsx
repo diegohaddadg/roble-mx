@@ -11,41 +11,58 @@ import {
 
 interface RestaurantContextValue {
   restaurantId: string;
+  restaurantName: string;
   isReady: boolean;
-  setRestaurantId: (id: string) => void;
-  clearRestaurantId: () => void;
+  setSession: (id: string, name: string) => void;
+  clearSession: () => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextValue | null>(null);
 
-const STORAGE_KEY = "toast_restaurant_id";
-
-export function RestaurantProvider({ children }: { children: ReactNode }) {
-  const [restaurantId, setRestaurantIdState] = useState("");
-  const [isReady, setIsReady] = useState(false);
+export function RestaurantProvider({
+  children,
+  initialId,
+  initialName,
+}: {
+  children: ReactNode;
+  initialId?: string;
+  initialName?: string;
+}) {
+  const [restaurantId, setRestaurantId] = useState(initialId ?? "");
+  const [restaurantName, setRestaurantName] = useState(initialName ?? "");
+  const [isReady, setIsReady] = useState(!!initialId);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) setRestaurantIdState(saved);
-    setIsReady(true);
-  }, []);
-
-  const setRestaurantId = useCallback((id: string) => {
-    const trimmed = id.trim();
-    if (trimmed) {
-      setRestaurantIdState(trimmed);
-      localStorage.setItem(STORAGE_KEY, trimmed);
+    if (initialId) {
+      setIsReady(true);
+      return;
     }
+
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.authenticated) {
+          setRestaurantId(data.restaurantId);
+          setRestaurantName(data.restaurantName ?? "");
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsReady(true));
+  }, [initialId]);
+
+  const setSession = useCallback((id: string, name: string) => {
+    setRestaurantId(id);
+    setRestaurantName(name);
   }, []);
 
-  const clearRestaurantId = useCallback(() => {
-    setRestaurantIdState("");
-    localStorage.removeItem(STORAGE_KEY);
+  const clearSession = useCallback(() => {
+    setRestaurantId("");
+    setRestaurantName("");
   }, []);
 
   return (
     <RestaurantContext.Provider
-      value={{ restaurantId, isReady, setRestaurantId, clearRestaurantId }}
+      value={{ restaurantId, restaurantName, isReady, setSession, clearSession }}
     >
       {children}
     </RestaurantContext.Provider>

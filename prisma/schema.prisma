@@ -12,18 +12,21 @@ datasource db {
 
 // ─── RESTAURANT ────────────────────────────────────────────
 model Restaurant {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  address   String?
-  city      String   @default("CDMX")
-  state     String   @default("Ciudad de México")
-  phone     String?
-  email     String?
-  ownerId   String?  // future: link to auth user
-  currency  String   @default("MXN")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  address        String?
+  city           String   @default("CDMX")
+  state          String   @default("Ciudad de México")
+  phone          String?
+  email          String?
+  ownerName      String?
+  ownerWhatsApp  String?  @unique
+  pinHash        String?
+  ownerId        String?
+  currency       String   @default("MXN")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   suppliers    Supplier[]
   ingredients  Ingredient[]
