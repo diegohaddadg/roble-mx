@@ -395,44 +395,75 @@ export default function InventoryDetailPage() {
             </div>
             <div className="divide-y divide-[var(--border-light)]">
               {movements.map((m) => (
-                <div
-                  key={m.id}
-                  className="grid grid-cols-12 gap-2 px-5 py-2.5 items-center"
-                >
-                  <div className="col-span-3 text-xs text-[var(--muted)]">
-                    {formatDate(m.date)}
+                <div key={m.id}>
+                  {/* Desktop row */}
+                  <div className="hidden sm:grid grid-cols-12 gap-2 px-5 py-2.5 items-center">
+                    <div className="col-span-3 text-xs text-[var(--muted)]">
+                      {formatDate(m.date)}
+                    </div>
+                    <div className="col-span-2">
+                      <SourceBadge source={m.source} />
+                    </div>
+                    <div
+                      className={`col-span-2 text-right text-sm font-medium tabular-nums ${
+                        m.delta > 0
+                          ? "text-[var(--success)]"
+                          : m.delta < 0
+                            ? "text-[var(--danger)]"
+                            : "text-[var(--muted)]"
+                      }`}
+                    >
+                      {m.delta > 0 ? "+" : ""}
+                      {m.delta.toFixed(1)}
+                    </div>
+                    <div className="col-span-2 text-right text-sm text-[var(--text)] tabular-nums">
+                      {m.newOnHand.toFixed(1)}
+                    </div>
+                    <div className="col-span-3 text-xs text-[var(--muted)] truncate">
+                      {m.invoiceId ? (
+                        <Link
+                          href={`/invoices/${m.invoiceId}`}
+                          className="text-[var(--primary)] hover:underline"
+                        >
+                          {m.invoiceNumber
+                            ? `#${m.invoiceNumber}`
+                            : "Ver factura"}
+                        </Link>
+                      ) : (
+                        m.notes || "—"
+                      )}
+                    </div>
                   </div>
-                  <div className="col-span-2">
-                    <SourceBadge source={m.source} />
-                  </div>
-                  <div
-                    className={`col-span-2 text-right text-sm font-medium tabular-nums ${
-                      m.delta > 0
-                        ? "text-[var(--success)]"
-                        : m.delta < 0
-                          ? "text-[var(--danger)]"
-                          : "text-[var(--muted)]"
-                    }`}
-                  >
-                    {m.delta > 0 ? "+" : ""}
-                    {m.delta.toFixed(1)}
-                  </div>
-                  <div className="col-span-2 text-right text-sm text-[var(--text)] tabular-nums">
-                    {m.newOnHand.toFixed(1)}
-                  </div>
-                  <div className="col-span-3 text-xs text-[var(--muted)] truncate">
-                    {m.invoiceId ? (
-                      <Link
-                        href={`/invoices/${m.invoiceId}`}
-                        className="text-[var(--primary)] hover:underline"
+                  {/* Mobile card */}
+                  <div className="sm:hidden px-4 py-3">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <SourceBadge source={m.source} />
+                      <span
+                        className={`text-sm font-semibold tabular-nums ${
+                          m.delta > 0
+                            ? "text-[var(--success)]"
+                            : m.delta < 0
+                              ? "text-[var(--danger)]"
+                              : "text-[var(--muted)]"
+                        }`}
                       >
-                        {m.invoiceNumber
-                          ? `#${m.invoiceNumber}`
-                          : "Ver factura"}
-                      </Link>
-                    ) : (
-                      m.notes || "—"
-                    )}
+                        {m.delta > 0 ? "+" : ""}
+                        {m.delta.toFixed(1)} → {m.newOnHand.toFixed(1)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-[var(--muted)]">
+                      <span>{formatDate(m.date)}</span>
+                      {m.invoiceId ? (
+                        <Link
+                          href={`/invoices/${m.invoiceId}`}
+                          className="text-[var(--primary)] hover:underline"
+                        >
+                          {m.invoiceNumber ? `#${m.invoiceNumber}` : "Ver factura"}
+                        </Link>
+                      ) : (
+                        <span className="truncate max-w-[150px]">{m.notes || "—"}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

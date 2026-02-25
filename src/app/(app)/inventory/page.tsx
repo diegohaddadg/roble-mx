@@ -45,10 +45,77 @@ function StatusPill({ status }: { status: "OK" | "Bajo" | "Crítico" | null }) {
   );
 }
 
+/* ── Skeletons ── */
+
+function DesktopSkeleton() {
+  return (
+    <div className="hidden md:block bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm overflow-hidden animate-pulse">
+      <div className="grid grid-cols-12 gap-2 px-5 py-3 bg-[var(--bg)] border-b border-[var(--border-light)]">
+        <div className="col-span-3"><div className="h-3 w-20 bg-[var(--border)] rounded" /></div>
+        <div className="col-span-2"><div className="h-3 w-16 bg-[var(--border)] rounded" /></div>
+        <div className="col-span-1"><div className="h-3 w-12 bg-[var(--border)] rounded" /></div>
+        <div className="col-span-2"><div className="h-3 w-14 bg-[var(--border)] rounded" /></div>
+        <div className="col-span-2"><div className="h-3 w-16 bg-[var(--border)] rounded" /></div>
+        <div className="col-span-2"><div className="h-3 w-14 bg-[var(--border)] rounded" /></div>
+      </div>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-[var(--border-light)] last:border-0"
+        >
+          <div className="col-span-3"><div className="h-4 w-28 bg-[var(--border-light)] rounded" /></div>
+          <div className="col-span-2"><div className="h-4 w-16 bg-[var(--border-light)] rounded" /></div>
+          <div className="col-span-1 flex justify-center"><div className="h-4 w-8 bg-[var(--border-light)] rounded" /></div>
+          <div className="col-span-2 flex justify-end"><div className="h-4 w-12 bg-[var(--border-light)] rounded" /></div>
+          <div className="col-span-2 flex justify-end"><div className="h-4 w-20 bg-[var(--border-light)] rounded" /></div>
+          <div className="col-span-2 flex justify-end"><div className="h-5 w-14 bg-[var(--border-light)] rounded-full" /></div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MobileSkeleton() {
+  return (
+    <div className="md:hidden space-y-3 animate-pulse">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div
+          key={i}
+          className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] p-4 space-y-3"
+        >
+          <div className="flex items-center justify-between">
+            <div className="h-4 w-28 bg-[var(--border-light)] rounded" />
+            <div className="h-5 w-14 bg-[var(--border-light)] rounded-full" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-4 w-16 bg-[var(--border-light)] rounded" />
+            <div className="h-4 w-10 bg-[var(--border-light)] rounded" />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="h-6 w-12 bg-[var(--border-light)] rounded" />
+            <div className="h-3 w-24 bg-[var(--border-light)] rounded" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SummaryPillsSkeleton() {
+  return (
+    <div className="flex flex-wrap gap-3 animate-pulse">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="h-8 w-24 bg-[var(--border-light)] rounded-xl" />
+      ))}
+    </div>
+  );
+}
+
 export default function InventoryPage() {
   const { restaurantId } = useRestaurant();
   const [rows, setRows] = useState<InventoryRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Todas");
   const [initializingId, setInitializingId] = useState<string | null>(null);
@@ -56,12 +123,15 @@ export default function InventoryPage() {
   const load = useCallback(async () => {
     if (!restaurantId) return;
     setIsLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/inventory?restaurantId=${restaurantId}`);
+      if (!res.ok) throw new Error("Error al cargar inventario");
       const data = await res.json();
       setRows(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Load inventory error:", err);
+      setError("No pudimos cargar tu inventario. Revisa tu conexión e intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -127,8 +197,13 @@ export default function InventoryPage() {
     });
   };
 
+  const hasFilters = search !== "" || category !== "Todas";
+  const isEmptyState = !isLoading && !error && rows.length === 0;
+  const isNoResults = !isLoading && !error && rows.length > 0 && filtered.length === 0;
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
@@ -147,7 +222,8 @@ export default function InventoryPage() {
       </div>
 
       {/* Summary pills */}
-      {!isLoading && rows.length > 0 && (
+      {isLoading && <SummaryPillsSkeleton />}
+      {!isLoading && !error && rows.length > 0 && (
         <div className="flex flex-wrap gap-3">
           {counts.critico > 0 && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--danger-light)] rounded-xl">
@@ -204,129 +280,235 @@ export default function InventoryPage() {
         </select>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-3 animate-pulse">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-14 bg-[var(--card)] rounded-xl border border-[var(--border-light)]"
-            />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
+      {/* Error state */}
+      {error && (
         <div className="text-center py-20">
-          <div className="w-14 h-14 bg-[var(--border-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-7 h-7 text-[var(--muted)]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"
-              />
+          <div className="w-14 h-14 bg-[var(--danger-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-[var(--danger)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
             </svg>
           </div>
           <h3 className="font-semibold text-[var(--text)] mb-1">
-            {rows.length === 0
-              ? "Sin ingredientes registrados"
-              : "Sin resultados"}
+            Algo salió mal
+          </h3>
+          <p className="text-sm text-[var(--muted)] mb-5 max-w-xs mx-auto">
+            {error}
+          </p>
+          <button
+            onClick={load}
+            className="px-4 py-2 text-sm font-medium text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] rounded-xl transition-colors active:scale-[0.98]"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {/* Loading skeletons */}
+      {isLoading && (
+        <>
+          <DesktopSkeleton />
+          <MobileSkeleton />
+        </>
+      )}
+
+      {/* Empty state: no rows at all */}
+      {isEmptyState && (
+        <div className="text-center py-20">
+          <div className="w-14 h-14 bg-[var(--primary-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+            </svg>
+          </div>
+          <h3 className="font-semibold text-[var(--text)] mb-1">
+            Sin ingredientes registrados
+          </h3>
+          <p className="text-sm text-[var(--muted)] mb-5 max-w-xs mx-auto">
+            Escanea facturas para llenar tu inventario
+          </p>
+          <Link
+            href="/scanner"
+            className="inline-flex px-4 py-2 text-sm font-medium text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] rounded-xl transition-colors active:scale-[0.98]"
+          >
+            Escanear factura →
+          </Link>
+        </div>
+      )}
+
+      {/* Empty state: filters returned 0 */}
+      {isNoResults && (
+        <div className="text-center py-20">
+          <div className="w-14 h-14 bg-[var(--border-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+          </div>
+          <h3 className="font-semibold text-[var(--text)] mb-1">
+            Sin resultados
           </h3>
           <p className="text-sm text-[var(--muted)] mb-5">
-            {rows.length === 0
-              ? "Escanea facturas para registrar ingredientes automáticamente"
-              : "Intenta con otro término de búsqueda o categoría"}
+            Intenta con otro término de búsqueda o categoría
           </p>
-          {rows.length === 0 && (
-            <Link
-              href="/scanner"
+          {hasFilters && (
+            <button
+              onClick={() => {
+                setSearch("");
+                setCategory("Todas");
+              }}
               className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium"
             >
-              Escanear factura →
-            </Link>
+              Limpiar filtros
+            </button>
           )}
         </div>
-      ) : (
-        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm overflow-hidden">
-          {/* Header */}
-          <div className="grid grid-cols-12 gap-2 px-5 py-3 bg-[var(--bg)] border-b border-[var(--border-light)]">
-            <div className="col-span-3 text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
-              Ingrediente
+      )}
+
+      {/* Data table / cards */}
+      {!isLoading && !error && filtered.length > 0 && (
+        <>
+          {/* ── Desktop table ── */}
+          <div className="hidden md:block bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm overflow-hidden">
+            <div className="grid grid-cols-12 gap-2 px-5 py-3 bg-[var(--bg)] border-b border-[var(--border-light)]">
+              <div className="col-span-3 text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
+                Ingrediente
+              </div>
+              <div className="col-span-2 text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
+                Categoría
+              </div>
+              <div className="col-span-1 text-center text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
+                Unidad
+              </div>
+              <div className="col-span-2 text-right text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
+                En mano
+              </div>
+              <div className="col-span-2 text-right text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
+                Actualizado
+              </div>
+              <div className="col-span-2 text-right text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
+                Estado
+              </div>
             </div>
-            <div className="col-span-2 text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
-              Categoría
-            </div>
-            <div className="col-span-1 text-center text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
-              Unidad
-            </div>
-            <div className="col-span-2 text-right text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
-              En mano
-            </div>
-            <div className="col-span-2 text-right text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
-              Actualizado
-            </div>
-            <div className="col-span-2 text-right text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider">
-              Estado
-            </div>
+
+            {filtered.map((row) => (
+              <div
+                key={row.ingredientId}
+                className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-[var(--border-light)] last:border-0 hover:bg-[var(--bg)]/50 transition-colors items-center"
+              >
+                {row.onHand !== null ? (
+                  <Link
+                    href={`/inventory/${row.ingredientId}`}
+                    className="col-span-3 text-sm font-medium text-[var(--text)] truncate hover:text-[var(--primary)] transition-colors"
+                  >
+                    {row.name}
+                  </Link>
+                ) : (
+                  <span className="col-span-3 text-sm font-medium text-[var(--text)] truncate">
+                    {row.name}
+                  </span>
+                )}
+                <div className="col-span-2 text-sm text-[var(--muted)] truncate">
+                  {row.category ?? "—"}
+                </div>
+                <div className="col-span-1 text-center text-sm text-[var(--muted)]">
+                  {row.unit}
+                </div>
+                <div className="col-span-2 text-right text-sm font-medium text-[var(--text)] tabular-nums">
+                  {row.onHand !== null ? row.onHand.toFixed(1) : "—"}
+                </div>
+                <div className="col-span-2 text-right text-xs text-[var(--muted)]">
+                  {formatDate(row.updatedAt)}
+                </div>
+                <div className="col-span-2 text-right">
+                  {row.onHand !== null ? (
+                    <StatusPill status={row.status} />
+                  ) : (
+                    <button
+                      onClick={() => handleInitialize(row.ingredientId)}
+                      disabled={initializingId === row.ingredientId}
+                      className="text-[11px] font-medium text-[var(--primary)] hover:text-[var(--primary-hover)] disabled:opacity-50 transition-colors"
+                    >
+                      {initializingId === row.ingredientId
+                        ? "..."
+                        : "Inicializar"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Rows */}
-          {filtered.map((row) => (
-            <div
-              key={row.ingredientId}
-              className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-[var(--border-light)] last:border-0 hover:bg-[var(--bg)]/50 transition-colors"
-            >
-              {row.onHand !== null ? (
-                <Link
-                  href={`/inventory/${row.ingredientId}`}
-                  className="col-span-3 text-sm font-medium text-[var(--text)] truncate hover:text-[var(--primary)] transition-colors"
-                >
-                  {row.name}
-                </Link>
-              ) : (
-                <span className="col-span-3 text-sm font-medium text-[var(--text)] truncate">
-                  {row.name}
-                </span>
-              )}
-              <div className="col-span-2 text-sm text-[var(--muted)] truncate">
-                {row.category ?? "—"}
-              </div>
-              <div className="col-span-1 text-center text-sm text-[var(--muted)]">
-                {row.unit}
-              </div>
-              <div className="col-span-2 text-right text-sm font-medium text-[var(--text)] tabular-nums">
-                {row.onHand !== null ? row.onHand.toFixed(1) : "—"}
-              </div>
-              <div className="col-span-2 text-right text-xs text-[var(--muted)]">
-                {formatDate(row.updatedAt)}
-              </div>
-              <div className="col-span-2 text-right">
-                {row.onHand !== null ? (
-                  <StatusPill status={row.status} />
-                ) : (
+          {/* ── Mobile cards ── */}
+          <div className="md:hidden space-y-3">
+            {filtered.map((row) => (
+              <div
+                key={row.ingredientId}
+                className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-4 space-y-3"
+              >
+                {/* Row 1: Name + Status */}
+                <div className="flex items-start justify-between gap-2">
+                  {row.onHand !== null ? (
+                    <Link
+                      href={`/inventory/${row.ingredientId}`}
+                      className="text-sm font-semibold text-[var(--text)] hover:text-[var(--primary)] transition-colors leading-tight"
+                    >
+                      {row.name}
+                    </Link>
+                  ) : (
+                    <span className="text-sm font-semibold text-[var(--text)] leading-tight">
+                      {row.name}
+                    </span>
+                  )}
+                  {row.onHand !== null ? (
+                    <StatusPill status={row.status} />
+                  ) : null}
+                </div>
+
+                {/* Row 2: Category + Unit */}
+                <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+                  <span>{row.category ?? "Sin categoría"}</span>
+                  <span>·</span>
+                  <span>{row.unit}</span>
+                </div>
+
+                {/* Row 3: On-hand amount + last updated */}
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-[var(--muted)] mb-0.5">
+                      En mano
+                    </p>
+                    <p className="text-lg font-semibold text-[var(--text)] tabular-nums leading-none">
+                      {row.onHand !== null ? row.onHand.toFixed(1) : "—"}
+                    </p>
+                  </div>
+                  <span className="text-[11px] text-[var(--muted)]">
+                    {formatDate(row.updatedAt)}
+                  </span>
+                </div>
+
+                {/* Initialize button for uninitialized items */}
+                {row.onHand === null && (
                   <button
                     onClick={() => handleInitialize(row.ingredientId)}
                     disabled={initializingId === row.ingredientId}
-                    className="text-[11px] font-medium text-[var(--primary)] hover:text-[var(--primary-hover)] disabled:opacity-50 transition-colors"
+                    className="w-full py-2 text-sm font-medium text-[var(--primary)] bg-[var(--primary-light)] hover:bg-[var(--primary-light)]/80 rounded-xl transition-colors disabled:opacity-50 active:scale-[0.98]"
                   >
                     {initializingId === row.ingredientId
-                      ? "..."
+                      ? "Inicializando..."
                       : "Inicializar"}
                   </button>
                 )}
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
       )}
 
-      <p className="text-xs text-[var(--muted)] text-center">
-        {filtered.length} de {rows.length} ingrediente
-        {rows.length !== 1 ? "s" : ""}
-      </p>
+      {/* Count */}
+      {!isLoading && !error && rows.length > 0 && (
+        <p className="text-xs text-[var(--muted)] text-center">
+          {filtered.length} de {rows.length} ingrediente
+          {rows.length !== 1 ? "s" : ""}
+        </p>
+      )}
     </div>
   );
 }

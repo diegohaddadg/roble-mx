@@ -22,8 +22,8 @@ export default function AppNav() {
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[var(--border)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-14">
-          <Link href="/scanner" className="flex items-center gap-2.5">
+        <div className="flex items-center h-14 gap-3">
+          <Link href="/scanner" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 bg-[var(--primary)] rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">T</span>
             </div>
@@ -33,23 +33,25 @@ export default function AppNav() {
           </Link>
 
           {restaurantId && (
-            <div className="flex items-center gap-0.5">
-              {navItems.map((item) => {
-                const isActive = pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-all duration-150 ${
-                      isActive
-                        ? "text-[var(--primary)] bg-[var(--primary-light)]"
-                        : "text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--border-light)]"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+            <div className="flex-1 overflow-x-auto scrollbar-hide -mx-1">
+              <div className="flex items-center gap-0.5 px-1 min-w-max">
+                {navItems.map((item) => {
+                  const isActive = pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`px-3 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-150 whitespace-nowrap ${
+                        isActive
+                          ? "text-[var(--primary)] bg-[var(--primary-light)]"
+                          : "text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--border-light)]"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

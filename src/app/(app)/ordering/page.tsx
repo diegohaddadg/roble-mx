@@ -32,6 +32,10 @@ interface SupplierGroup {
   subtotal: number;
 }
 
+function fmt(val: number): string {
+  return `$${Number(val).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 function ReasonBadge({ reason }: { reason: string }) {
   const map: Record<string, string> = {
     Crítico: "bg-[var(--danger-light)] text-[var(--danger)]",
@@ -41,7 +45,7 @@ function ReasonBadge({ reason }: { reason: string }) {
   };
   return (
     <span
-      className={`inline-flex px-2 py-0.5 text-[10px] font-semibold rounded-full ${map[reason] ?? "bg-zinc-100 text-zinc-600"}`}
+      className={`inline-flex px-2 py-0.5 text-[10px] font-semibold rounded-full whitespace-nowrap ${map[reason] ?? "bg-zinc-100 text-zinc-600"}`}
     >
       {reason}
     </span>
@@ -52,14 +56,128 @@ function buildWhatsAppMessage(group: SupplierGroup): string {
   const lines = group.items.map(
     (s) => `- ${s.name}: ${s.suggestedQty} ${s.unit}`
   );
-  const total = `$${group.subtotal.toLocaleString("es-MX", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-  return `Hola ${group.supplierName}, necesito para esta semana:\n${lines.join("\n")}\n\nTotal estimado: ${total}\nGracias!`;
+  return `Hola ${group.supplierName}, necesito para esta semana:\n${lines.join("\n")}\n\nTotal estimado: ${fmt(group.subtotal)}\nGracias!`;
 }
 
 function cleanPhone(phone: string): string {
   return phone.replace(/[^0-9]/g, "");
 }
 
+/* ── Loading skeleton ── */
+function OrderingSkeleton() {
+  return (
+    <div className="space-y-5 animate-pulse">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div
+          key={i}
+          className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] overflow-hidden"
+        >
+          <div className="px-4 py-3 sm:px-5 sm:py-4 border-b border-[var(--border-light)] flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="h-4 w-32 bg-[var(--border-light)] rounded" />
+              <div className="h-3 w-20 bg-[var(--border-light)] rounded" />
+            </div>
+            <div className="h-6 w-20 bg-[var(--border-light)] rounded" />
+          </div>
+          <div className="px-4 py-3 sm:px-5 space-y-3">
+            {Array.from({ length: i === 0 ? 4 : 2 }).map((_, j) => (
+              <div key={j} className="flex items-center justify-between gap-3">
+                <div className="h-3 flex-1 max-w-[120px] bg-[var(--border-light)] rounded" />
+                <div className="h-3 w-10 bg-[var(--border-light)] rounded" />
+                <div className="h-3 w-14 bg-[var(--border-light)] rounded" />
+              </div>
+            ))}
+          </div>
+          <div className="px-4 py-3 sm:px-5 border-t border-[var(--border-light)] flex flex-col sm:flex-row gap-2">
+            <div className="h-10 sm:h-9 w-full sm:w-36 bg-[var(--border-light)] rounded-xl" />
+            <div className="h-10 sm:h-9 w-full sm:w-36 bg-[var(--border-light)] rounded-xl" />
+            <div className="h-10 sm:h-9 w-full sm:w-28 bg-[var(--border-light)] rounded-xl" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Error state ── */
+function OrderingError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="text-center py-16 px-4">
+      <div className="w-14 h-14 bg-[var(--danger-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg
+          className="w-7 h-7 text-[var(--danger)]"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+          />
+        </svg>
+      </div>
+      <h3 className="font-semibold text-[var(--text)] mb-1">
+        Algo salió mal
+      </h3>
+      <p className="text-sm text-[var(--muted)] mb-5 max-w-xs mx-auto">
+        No pudimos calcular las sugerencias. Intenta de nuevo.
+      </p>
+      <button
+        onClick={onRetry}
+        className="w-full max-w-xs px-5 py-2.5 text-sm font-medium text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] rounded-xl transition-colors active:scale-[0.98]"
+      >
+        Reintentar
+      </button>
+    </div>
+  );
+}
+
+/* ── Empty state ── */
+function OrderingEmpty() {
+  return (
+    <div className="text-center py-16 px-4">
+      <div className="w-14 h-14 bg-[var(--primary-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg
+          className="w-7 h-7 text-[var(--primary)]"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15a2.25 2.25 0 0 1 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z"
+          />
+        </svg>
+      </div>
+      <h3 className="font-semibold text-[var(--text)] mb-1">
+        Necesitas historial de facturas para generar sugerencias
+      </h3>
+      <p className="text-sm text-[var(--muted)] mb-6 max-w-xs mx-auto">
+        Escanea tus facturas de proveedor para que podamos calcular qué pedir.
+      </p>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <Link
+          href="/inventory"
+          className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-[var(--primary)] bg-[var(--primary-light)] hover:bg-[var(--primary-light)]/80 rounded-xl transition-colors text-center"
+        >
+          Ver inventario
+        </Link>
+        <Link
+          href="/scanner"
+          className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] rounded-xl transition-colors text-center"
+        >
+          Escanear factura
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* ── Supplier card ── */
 function SupplierCard({ group }: { group: SupplierGroup }) {
   const [copied, setCopied] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
@@ -110,11 +228,11 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
 
   return (
     <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm overflow-hidden">
-      {/* Card header */}
-      <div className="px-5 py-4 bg-[var(--bg)] border-b border-[var(--border-light)]">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h3 className="text-sm font-bold text-[var(--text)]">
+      {/* Header */}
+      <div className="px-4 py-3 sm:px-5 sm:py-4 bg-[var(--bg)] border-b border-[var(--border-light)]">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="text-sm font-bold text-[var(--text)] truncate">
               {group.supplierName}
             </h3>
             {group.supplierPhone && (
@@ -123,13 +241,9 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
               </p>
             )}
           </div>
-          <div className="text-right">
-            <div className="text-lg font-bold text-[var(--text)] tabular-nums">
-              $
-              {group.subtotal.toLocaleString("es-MX", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}
+          <div className="text-right shrink-0">
+            <div className="text-base sm:text-lg font-bold text-[var(--text)] tabular-nums">
+              {fmt(group.subtotal)}
             </div>
             <div className="text-[11px] text-[var(--muted)]">
               {group.items.length} artículo
@@ -139,7 +253,7 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
         </div>
       </div>
 
-      {/* Printable content (hidden, used for print) */}
+      {/* Hidden printable content */}
       <div ref={printRef} className="hidden">
         <h1>Pedido para {group.supplierName}</h1>
         <div className="sub">
@@ -160,28 +274,16 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
                 <td>{s.name}</td>
                 <td className="r">{s.suggestedQty}</td>
                 <td>{s.unit}</td>
-                <td className="r">
-                  $
-                  {s.estimatedCost.toLocaleString("es-MX", {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  })}
-                </td>
+                <td className="r">{fmt(s.estimatedCost)}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="total">
-          Total estimado: $
-          {group.subtotal.toLocaleString("es-MX", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          })}
-        </div>
+        <div className="total">Total estimado: {fmt(group.subtotal)}</div>
       </div>
 
-      {/* Items table */}
-      <div className="hidden sm:grid grid-cols-12 gap-2 px-5 py-2 text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider border-b border-[var(--border-light)]">
+      {/* Desktop table header */}
+      <div className="hidden md:grid grid-cols-12 gap-2 px-5 py-2 text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider border-b border-[var(--border-light)]">
         <div className="col-span-3">Ingrediente</div>
         <div className="col-span-2 text-right">Pedir</div>
         <div className="col-span-1 text-center">Unidad</div>
@@ -189,7 +291,9 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
         <div className="col-span-2">Motivo</div>
         <div className="col-span-2 text-right">Costo est.</div>
       </div>
-      <div className="divide-y divide-[var(--border-light)]">
+
+      {/* Desktop table rows */}
+      <div className="hidden md:block divide-y divide-[var(--border-light)]">
         {group.items.map((s) => (
           <div
             key={s.ingredientId}
@@ -211,21 +315,44 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
               <ReasonBadge reason={s.reason} />
             </div>
             <div className="col-span-2 text-right text-sm font-medium text-[var(--text)] tabular-nums">
-              $
-              {s.estimatedCost.toLocaleString("es-MX", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}
+              {fmt(s.estimatedCost)}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Actions */}
-      <div className="px-5 py-3 border-t border-[var(--border-light)] flex flex-wrap gap-2">
+      {/* Mobile mini-cards */}
+      <div className="md:hidden divide-y divide-[var(--border-light)]">
+        {group.items.map((s) => (
+          <div key={s.ingredientId} className="px-4 py-3 space-y-1.5">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-sm font-medium text-[var(--text)]">
+                {s.name}
+              </span>
+              <span className="text-sm font-bold text-[var(--text)] tabular-nums shrink-0">
+                {fmt(s.estimatedCost)}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--muted)]">
+              <span>
+                Pedir:{" "}
+                <strong className="text-[var(--text)]">
+                  {s.suggestedQty.toFixed(1)}
+                </strong>{" "}
+                {s.unit}
+              </span>
+              <span>En mano: {s.onHand.toFixed(1)}</span>
+              <ReasonBadge reason={s.reason} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Action buttons */}
+      <div className="px-4 py-3 sm:px-5 border-t border-[var(--border-light)] flex flex-col sm:flex-row gap-2">
         <button
           onClick={handleCopy}
-          className={`px-4 py-2 text-xs font-medium rounded-xl transition-all active:scale-[0.98] ${
+          className={`w-full sm:w-auto px-4 py-2.5 sm:py-2 text-xs font-medium rounded-xl transition-all active:scale-[0.98] ${
             copied
               ? "bg-[var(--success)] text-white"
               : "bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)]"
@@ -238,14 +365,14 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
             href={waLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 text-xs font-medium bg-[#25D366] text-white rounded-xl hover:bg-[#20BD5C] transition-colors active:scale-[0.98]"
+            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-xs font-medium bg-[#25D366] text-white rounded-xl hover:bg-[#20BD5C] transition-colors active:scale-[0.98] text-center"
           >
             Abrir WhatsApp
           </a>
         )}
         <button
           onClick={handlePrint}
-          className="px-4 py-2 text-xs font-medium text-[var(--muted)] bg-[var(--border-light)] hover:bg-[var(--border)] rounded-xl transition-colors"
+          className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-xs font-medium text-[var(--muted)] bg-[var(--border-light)] hover:bg-[var(--border)] rounded-xl transition-colors active:scale-[0.98]"
         >
           Imprimir
         </button>
@@ -254,6 +381,7 @@ function SupplierCard({ group }: { group: SupplierGroup }) {
   );
 }
 
+/* ── Main page ── */
 export default function OrderingPage() {
   const { restaurantId } = useRestaurant();
   const [data, setData] = useState<OrderingData | null>(null);
@@ -266,6 +394,7 @@ export default function OrderingPage() {
     setHasError(false);
     try {
       const res = await fetch(`/api/ordering?restaurantId=${restaurantId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setData({
         suggestions: Array.isArray(json?.suggestions) ? json.suggestions : [],
@@ -310,12 +439,10 @@ export default function OrderingPage() {
       g.subtotal += s.estimatedCost;
     }
 
-    // Round subtotals
     for (const g of map.values()) {
       g.subtotal = Math.round(g.subtotal * 100) / 100;
     }
 
-    // Named suppliers first, then "sin proveedor"
     const named = [...map.values()].filter((g) => g.supplierId !== null);
     const none = map.get(NO_SUPPLIER);
     named.sort((a, b) => a.supplierName.localeCompare(b.supplierName));
@@ -323,13 +450,14 @@ export default function OrderingPage() {
   }, [suggestions]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="space-y-5 sm:space-y-6">
+      {/* Page header */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
             ¿Qué pedir esta semana?
           </h2>
-          <p className="text-sm text-[var(--muted)] mt-1">
+          <p className="text-sm text-[var(--muted)] mt-0.5">
             Pedidos agrupados por proveedor, listos para enviar
           </p>
         </div>
@@ -342,86 +470,15 @@ export default function OrderingPage() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-4 animate-pulse">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-40 bg-[var(--card)] rounded-2xl border border-[var(--border-light)]"
-            />
-          ))}
-        </div>
+        <OrderingSkeleton />
       ) : hasError ? (
-        <div className="text-center py-20">
-          <div className="w-14 h-14 bg-[var(--danger-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-7 h-7 text-[var(--danger)]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-              />
-            </svg>
-          </div>
-          <h3 className="font-semibold text-[var(--text)] mb-1">
-            Algo salió mal
-          </h3>
-          <p className="text-sm text-[var(--muted)] mb-5">
-            No pudimos calcular las sugerencias. Intenta de nuevo.
-          </p>
-          <button
-            onClick={load}
-            className="px-5 py-2 text-sm font-medium text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] rounded-xl transition-colors active:scale-[0.98]"
-          >
-            Reintentar
-          </button>
-        </div>
+        <OrderingError onRetry={load} />
       ) : suggestions.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="w-14 h-14 bg-[var(--success-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-7 h-7 text-[var(--success)]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m4.5 12.75 6 6 9-13.5"
-              />
-            </svg>
-          </div>
-          <h3 className="font-semibold text-[var(--text)] mb-1">
-            No necesitas pedir nada ahora
-          </h3>
-          <p className="text-sm text-[var(--muted)] mb-5">
-            Tu inventario está cubierto. Revisa de nuevo en unos días.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/inventory"
-              className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium"
-            >
-              Ir a Inventario →
-            </Link>
-            <Link
-              href="/scanner"
-              className="text-sm text-[var(--muted)] hover:text-[var(--text)] font-medium"
-            >
-              Escanear factura →
-            </Link>
-          </div>
-        </div>
+        <OrderingEmpty />
       ) : (
         <>
           {/* Supplier cards */}
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             {groups.map((g) => (
               <SupplierCard
                 key={g.supplierId ?? "__none__"}
@@ -430,22 +487,18 @@ export default function OrderingPage() {
             ))}
           </div>
 
-          {/* Grand total */}
-          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-5">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+          {/* Summary bar */}
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border-light)] shadow-sm p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <div className="text-sm text-[var(--muted)]">
+                <div className="text-xs sm:text-sm text-[var(--muted)]">
                   {summary.totalItems} ingrediente
                   {summary.totalItems !== 1 ? "s" : ""} · {groups.length}{" "}
                   proveedor{groups.length !== 1 ? "es" : ""}
                 </div>
-                <div className="text-2xl font-bold text-[var(--text)] tabular-nums">
-                  $
-                  {summary.totalEstimatedCost.toLocaleString("es-MX", {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  })}
-                  <span className="text-sm font-normal text-[var(--muted)] ml-1">
+                <div className="text-xl sm:text-2xl font-bold text-[var(--text)] tabular-nums">
+                  {fmt(summary.totalEstimatedCost)}
+                  <span className="text-xs sm:text-sm font-normal text-[var(--muted)] ml-1">
                     costo total estimado
                   </span>
                 </div>
