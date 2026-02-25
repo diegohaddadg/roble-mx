@@ -115,13 +115,22 @@ export default function InvoiceReview({
           const raw = await response.text();
           const parsed = JSON.parse(raw);
           errorMsg = parsed.error || parsed.details
-            ? `${parsed.error || "Error"}${parsed.details ? ` — ${JSON.stringify(parsed.details)}` : ""}`
+            ? `${parsed.error || "Error"}${parsed.details ? ` — ${parsed.details}` : ""}`
             : raw;
         } catch {
           // non-JSON response
         }
         console.error("Confirm failed:", { status: response.status, error: errorMsg });
-        setConfirmError(errorMsg);
+
+        const friendlyMessages: Record<string, string> = {
+          "Restaurante no encontrado (posible reseed). Actualiza tu restaurantId.":
+            "Restaurant inválido. Ve a configuración y pega el Restaurant ID correcto.",
+          "restaurantId missing":
+            "Restaurant ID no configurado.",
+          "Invalid restaurantId":
+            "Restaurant ID inválido. Ve a configuración.",
+        };
+        setConfirmError(friendlyMessages[errorMsg] || errorMsg);
         return;
       }
 

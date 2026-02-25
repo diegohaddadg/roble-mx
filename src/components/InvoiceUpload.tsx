@@ -33,8 +33,24 @@ export default function InvoiceUpload({
         });
 
         if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error || "Upload failed");
+          let serverError: string;
+          try {
+            const err = await response.json();
+            serverError = err.error || "Upload failed";
+          } catch {
+            serverError = `Error ${response.status}`;
+          }
+
+          const friendlyMessages: Record<string, string> = {
+            "restaurantId is required":
+              "Restaurant ID no configurado. Ve a configuración y pega tu Restaurant ID.",
+            "Restaurante no encontrado. Actualiza tu restaurantId después de reseed.":
+              "Restaurant inválido. Ve a configuración y pega el Restaurant ID correcto.",
+            "No existe ningún restaurante. Ejecuta npx prisma db seed primero.":
+              "No hay restaurantes en la base de datos. Ejecuta el seed primero.",
+          };
+
+          throw new Error(friendlyMessages[serverError] || serverError);
         }
 
         const data: UploadResponse = await response.json();

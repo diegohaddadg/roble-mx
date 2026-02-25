@@ -122,15 +122,16 @@ export async function POST(
         if (ingredientId) {
           const existingIngredient = await tx.ingredient.findUnique({
             where: { id: ingredientId },
-            select: { preferredSupplierId: true },
           });
+
+          const needsSupplier =
+            supplierId && existingIngredient && !existingIngredient.preferredSupplierId;
+
           await tx.ingredient.update({
             where: { id: ingredientId },
             data: {
               currentPrice: item.unitPrice,
-              ...(supplierId && !existingIngredient?.preferredSupplierId
-                ? { preferredSupplierId: supplierId }
-                : {}),
+              ...(needsSupplier ? { preferredSupplierId: supplierId } : {}),
             },
           });
 

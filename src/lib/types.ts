@@ -23,6 +23,7 @@ export interface UploadResponse {
   invoiceId: string;
   imageUrl: string;
   extraction: ExtractedInvoice;
+  usedFallbackRestaurantId?: string;
 }
 
 export interface ConfirmInvoicePayload {
