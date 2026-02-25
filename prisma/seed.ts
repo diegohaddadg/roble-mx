@@ -1,6 +1,6 @@
 // prisma/seed.ts — v3
 // Creates a complete, demo-ready restaurant scenario.
-// After seeding, every page in Toast MX shows meaningful data.
+// After seeding, every page in Roble shows meaningful data.
 
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRestaurant } from "@/context/restaurant";
+import { APP_NAME } from "@/lib/constants";
 import { useState } from "react";
 
 const navItems = [
@@ -39,10 +40,10 @@ export default function AppNav() {
         <div className="flex items-center h-14 gap-3">
           <Link href="/scanner" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 bg-[var(--primary)] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">T</span>
+              <span className="text-white font-bold text-sm">R</span>
             </div>
             <span className="font-semibold text-[var(--text)] hidden sm:block">
-              {restaurantName || "Toast MX"}
+              {restaurantName || APP_NAME}
             </span>
           </Link>
 

@@ -1,4 +1,4 @@
-// Toast MX — Phase 1: AI Inventory & Cost Intelligence
+// Roble — AI Inventory & Cost Intelligence for Restaurants
 // v2: Fixed monetary types (Decimal), added indexes, added recipe yield
 
 generator client {

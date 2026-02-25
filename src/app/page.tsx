@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { COOKIE_NAME } from "@/lib/auth";
+import { APP_NAME, APP_TAGLINE } from "@/lib/constants";
 
 export default async function LandingPage() {
   const cookieStore = await cookies();
@@ -15,14 +16,14 @@ export default async function LandingPage() {
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm text-center">
         <div className="w-16 h-16 bg-[var(--primary)] rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <span className="text-white font-bold text-3xl">T</span>
+          <span className="text-white font-bold text-3xl">R</span>
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)] mb-2">
-          Toast MX
+          {APP_NAME}
         </h1>
         <p className="text-[var(--muted)] text-sm sm:text-base mb-10">
-          Inteligencia de costos para tu restaurante.
+          {APP_TAGLINE}
         </p>
 
         <div className="space-y-3">

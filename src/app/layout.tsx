@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import { APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Toast MX — Inteligencia de Costos para Restaurantes",
-  description:
-    "Escanea facturas, rastrea costos, y descubre la rentabilidad real de cada platillo.",
+  title: `${APP_NAME} — Inteligencia de Costos para Restaurantes`,
+  description: APP_DESCRIPTION,
 };
 
 export default function RootLayout({

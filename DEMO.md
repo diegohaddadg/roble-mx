@@ -1,4 +1,4 @@
-# Toast MX — Demo Script
+# Roble — Demo Script
 
 **Audience**: Restaurant owner in Mexico City
 **Duration**: 5-7 minutes
@@ -9,7 +9,7 @@
 ## Setup (before demo)
 
 1. Ensure the app is seeded with demo data (`npx prisma db seed`)
-2. Open the app URL and paste the restaurant ID
+2. Open the app URL and log in with demo credentials (WhatsApp: `55 1234 5678`, PIN: `1234`)
 3. Have a real invoice photo ready (or use any photo — mock extraction will work)
 
 ---
@@ -37,7 +37,7 @@
 
 **Auto-navigates to**: `/impact/[invoiceId]`
 
-**Say**: "Aquí es donde Toast se diferencia. Inmediatamente después de confirmar, te mostramos el impacto real en tus platillos."
+**Say**: "Aquí es donde Roble se diferencia. Inmediatamente después de confirmar, te mostramos el impacto real en tus platillos."
 
 Point out:
 - **Ingredient price changes**: "La pechuga subió 12% esta semana"

@@ -149,7 +149,7 @@ export function buildWhatsAppSummary(
   suggestions: Suggestion[]
 ): string {
   const lines: string[] = [];
-  lines.push("📊 *Reporte de impacto — Toast MX*\n");
+  lines.push("📊 *Reporte de impacto — Roble*\n");
 
   lines.push(`*${ingredientChanges.length} ingrediente${ingredientChanges.length !== 1 ? "s" : ""} con cambio de precio:*`);
   for (const ic of ingredientChanges) {

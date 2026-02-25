@@ -54,7 +54,7 @@ export default function EnterPage() {
         <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 sm:p-8 shadow-sm">
           <div className="text-center mb-6">
             <div className="w-12 h-12 bg-[var(--primary)] rounded-xl flex items-center justify-center mx-auto mb-3">
-              <span className="text-white font-bold text-xl">T</span>
+              <span className="text-white font-bold text-xl">R</span>
             </div>
             <h1 className="text-xl font-bold text-[var(--text)]">
               Bienvenido de vuelta

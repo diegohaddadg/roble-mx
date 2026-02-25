@@ -1,4 +1,4 @@
-# Toast MX — Deploy to Vercel
+# Roble — Deploy to Vercel
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@
 **Option A — Vercel Postgres (recommended)**
 
 1. Go to [Vercel Dashboard](https://vercel.com/dashboard) → Storage → Create Database → Postgres
-2. Name it `toast-mx-db` and select your region (closest to CDMX: `iad1` or `cle1`)
+2. Name it `roble-db` and select your region (closest to CDMX: `iad1` or `cle1`)
 3. Copy the `DATABASE_URL` (pool connection string with `?pgbouncer=true&sslmode=require`)
 
 **Option B — Neon (free tier)**
@@ -101,8 +101,8 @@ npx dotenv -e .env.production.local -- npx prisma db seed
 1. Visit `https://your-app.vercel.app/api/health`
    - Should return `{ "status": "ok", "db": "connected", "restaurants": 1 }`
 2. Visit `https://your-app.vercel.app`
-   - Should redirect to `/scanner`
-   - Paste the restaurant ID from the seed output (or from `/api/health`)
+   - Should show the Roble landing page
+   - Use the demo credentials (WhatsApp: `55 1234 5678`, PIN: `1234`) to enter
 
 ## Environment Variables Reference
 

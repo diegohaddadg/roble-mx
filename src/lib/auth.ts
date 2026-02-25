@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-export const COOKIE_NAME = "toast_restaurant_id";
+export const COOKIE_NAME = "roble_restaurant_id";
 const THIRTY_DAYS = 60 * 60 * 24 * 30;
 
 export async function getRestaurantIdFromCookie(): Promise<string | null> {
