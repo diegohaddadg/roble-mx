@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { safeParseModelJson } from "@/lib/parse-model-json";
 
 const MENU_PROMPT = `Eres un asistente experto en menús de restaurantes mexicanos.
 
@@ -134,10 +135,7 @@ export async function POST(request: NextRequest) {
 
     let parsed: { dishes?: unknown[] };
     try {
-      const jsonStr = rawText.startsWith("```")
-        ? rawText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "")
-        : rawText;
-      parsed = JSON.parse(jsonStr);
+      parsed = safeParseModelJson(rawText) as { dishes?: unknown[] };
     } catch {
       return NextResponse.json(
         { error: true, message: "No se pudo interpretar el menú. Intenta con una imagen más clara." },

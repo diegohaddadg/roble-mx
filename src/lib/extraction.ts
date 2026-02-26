@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { ExtractedInvoice, ExtractedLineItem } from "./types";
+import { safeParseModelJson } from "./parse-model-json";
 
 const EXTRACTION_PROMPT = `Eres un asistente experto en extraer datos de facturas de proveedores de restaurantes en México.
 
@@ -158,17 +159,7 @@ export async function extractInvoiceData(
 
   const rawText = textBlock.text.trim();
 
-  let parsed: unknown;
-  try {
-    const jsonStr = rawText.startsWith("```")
-      ? rawText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "")
-      : rawText;
-    parsed = JSON.parse(jsonStr);
-  } catch {
-    throw new Error(
-      `Failed to parse AI response as JSON. Raw response:\n${rawText.slice(0, 500)}`
-    );
-  }
+  const parsed = safeParseModelJson(rawText);
 
   return validateExtraction(parsed);
 }
@@ -176,15 +167,36 @@ export async function extractInvoiceData(
 function validateExtraction(data: unknown): ExtractedInvoice {
   if (typeof data !== "object" || data === null) {
     throw new Error(
-      "AI extraction returned non-object. Expected ExtractedInvoice shape."
+      "No pude leer la factura. Intenta con otra foto más clara o recorta la tabla."
     );
   }
 
   const obj = data as Record<string, unknown>;
 
-  if (!Array.isArray(obj.lineItems)) {
+  if (!Array.isArray(obj.lineItems) || obj.lineItems.length === 0) {
     throw new Error(
-      'AI extraction missing "lineItems" array. Cannot proceed without line items.'
+      "No se encontraron productos en la factura. Asegúrate de que la imagen muestre la tabla de líneas."
+    );
+  }
+
+  const hasSupplier =
+    typeof obj.supplierName === "string" ||
+    typeof obj.supplier === "string";
+  const hasTotal =
+    typeof obj.total === "number" || typeof obj.subtotal === "number";
+
+  const firstItem = obj.lineItems[0] as Record<string, unknown> | null;
+  const hasValidItem =
+    firstItem &&
+    typeof firstItem === "object" &&
+    (typeof firstItem.description === "string" ||
+      typeof firstItem.descripcion === "string") &&
+    (typeof firstItem.quantity === "number" ||
+      typeof firstItem.cantidad === "number");
+
+  if (!hasSupplier && !hasTotal && !hasValidItem) {
+    throw new Error(
+      "No pude leer la factura. Intenta con otra foto más clara o recorta la tabla."
     );
   }
 
