@@ -61,6 +61,7 @@ export async function GET(request: NextRequest) {
         sellPrice,
         yield: recipe.yield,
         isActive: recipe.isActive,
+        estimatedFromMenu: recipe.estimatedFromMenu,
         items: recipe.items.map((item) => ({
           id: item.id,
           ingredientId: item.ingredientId,

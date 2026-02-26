@@ -7,14 +7,10 @@ import { APP_NAME } from "@/lib/constants";
 import { useState } from "react";
 
 const navItems = [
-  { href: "/scanner", label: "Facturas" },
-  { href: "/invoices", label: "Historial" },
-  { href: "/ingredients", label: "Ingredientes" },
-  { href: "/inventory", label: "Inventario" },
-  { href: "/ordering", label: "Qué pedir" },
-  { href: "/suppliers", label: "Proveedores" },
-  { href: "/recipes", label: "Recetas" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/scanner", label: "Escanear", icon: "📸" },
+  { href: "/inventory", label: "Inventario", icon: "📦" },
+  { href: "/recipes", label: "Recetas", icon: "🍽" },
+  { href: "/resumen", label: "Resumen", icon: "📊" },
 ] as const;
 
 export default function AppNav() {
@@ -56,12 +52,13 @@ export default function AppNav() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`px-3 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-150 whitespace-nowrap ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-150 whitespace-nowrap ${
                         isActive
                           ? "text-[var(--primary)] bg-[var(--primary-light)]"
                           : "text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--border-light)]"
                       }`}
                     >
+                      <span className="text-sm leading-none">{item.icon}</span>
                       {item.label}
                     </Link>
                   );

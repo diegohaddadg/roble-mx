@@ -155,15 +155,16 @@ model PriceHistory {
 
 // ─── RECIPE ────────────────────────────────────────────────
 model Recipe {
-  id           String   @id @default(cuid())
-  name         String
-  category     String?
-  sellPrice    Decimal? @db.Decimal(10, 2)
-  yield        Int      @default(1) // ← NEW: how many portions this recipe makes
-  isActive     Boolean  @default(true) // ← NEW: soft delete / hide from menu
-  restaurantId String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String   @id @default(cuid())
+  name              String
+  category          String?
+  sellPrice         Decimal? @db.Decimal(10, 2)
+  yield             Int      @default(1)
+  isActive          Boolean  @default(true)
+  estimatedFromMenu Boolean  @default(false)
+  restaurantId      String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   restaurant Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   items      RecipeItem[]
